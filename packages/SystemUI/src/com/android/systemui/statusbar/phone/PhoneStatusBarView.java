@@ -85,7 +85,6 @@ public class PhoneStatusBarView extends PanelBar {
         if(bg instanceof ColorDrawable) {
             setBackground(new BackgroundAlphaColorDrawable(((ColorDrawable) bg).getColor()));
         }
-
         // no need for observer, sysui gets killed when the style is changed.
         mToggleStyle = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.TOGGLES_STYLE, 0);
@@ -116,12 +115,12 @@ public class PhoneStatusBarView extends PanelBar {
         }
         pv.setRubberbandingEnabled(!mFullWidthNotifications);
     }
-   
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mBar.onBarViewDetached();
-    }
+    	}
  
     @Override
     public boolean panelsEnabled() {
@@ -200,6 +199,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
+        Slog.v(TAG, "onAllPanelsCollapsed");
         // give animations time to settle
         mBar.makeExpandedInvisibleSoon();
         mFadingPanel = null;
@@ -209,6 +209,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onPanelFullyOpened(PanelView openPanel) {
         super.onPanelFullyOpened(openPanel);
+        Slog.v(TAG, "onPanelFullyOpened: " + openPanel);
         if (openPanel != mLastFullyOpenedPanel) {
             openPanel.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
@@ -275,10 +276,10 @@ public class PhoneStatusBarView extends PanelBar {
         if (panel.getAlpha() != alpha) {
             panel.setAlpha(alpha);
         }
-        updateBackgroundAlpha(frac);
-        mBar.updateCarrierLabelVisibility(false);
+		updateBackgroundAlpha(frac);
+        updateShortcutsVisibility();
     }
-
+    
     private void updateBackgroundAlpha(float ex) {
         if(mFadingPanel != null || ex > 0) {
             mBar.mTransparencyManager.setTempDisableStatusbarState(true);
@@ -286,5 +287,27 @@ public class PhoneStatusBarView extends PanelBar {
             mBar.mTransparencyManager.setTempDisableStatusbarState(false);
         }
         mBar.mTransparencyManager.update();
+    }
+    
+    public void updateShortcutsVisibility() {
+        // Notification Shortcuts check for fully expanded panel
+        if (mBar.mSettingsButton == null || mBar.mNotificationButton == null) {
+            // Tablet
+            if (mFullyOpenedPanel != null) {
+                mBar.updateNotificationShortcutsVisibility(true);
+            } else {
+                mBar.updateNotificationShortcutsVisibility(false);
+            }
+        } else {
+            // Phone
+            if (mFullyOpenedPanel != null && (mBar.mSettingsButton.getVisibility() == View.VISIBLE &&
+                    !(mBar.mSettingsButton.getVisibility() == View.VISIBLE &&
+                    mBar.mNotificationButton.getVisibility() == View.VISIBLE))) {
+                mBar.updateNotificationShortcutsVisibility(true);
+            } else {
+                mBar.updateNotificationShortcutsVisibility(false);
+            }
+        }
+        mBar.updateCarrierAndWifiLabelVisibility(false);
     }
 }

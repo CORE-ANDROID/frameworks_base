@@ -27,6 +27,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsTileView;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public abstract class BaseToggle
         implements OnClickListener, OnLongClickListener {
@@ -41,6 +42,7 @@ public abstract class BaseToggle
     private boolean mVibratePref;
     private boolean mTactileFeedbackEnabled;
     private Vibrator vib;
+    private boolean mFloatingPref;
     private Drawable mIconDrawable = null;
     private int mIconLevel = -1;
     private CharSequence mLabelText = null;
@@ -134,9 +136,9 @@ public abstract class BaseToggle
         }
     }
 
-    protected final void vibrateOnTouch() {
+	protected final void vibrateOnTouch() {
         if (mTactileFeedbackEnabled &&  mVibratePref && vib != null ) {
-            vib.vibrate(25);
+            vib.vibrate(10);
         }
     }
 
@@ -196,14 +198,19 @@ public abstract class BaseToggle
             mHandler.postDelayed(mUpdateViewRunnable, 100);
     }
 
-    protected final void startActivity(String a) {
-        startActivity(new Intent(a));
+    protected final void startActivity(String action) {
+        Intent intent = new Intent(action);
+        startActivity(intent);
     }
 
-    protected final void startActivity(Intent i) {
+    protected final void startActivity(Intent intent) {
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (mFloatingPref) {
+            intent.addFlags(Intent.FLAG_FLOATING_WINDOW);
+        }
         collapseStatusBar();
         dismissKeyguard();
-        mContext.startActivityAsUser(i, new UserHandle(UserHandle.USER_CURRENT));
+        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
     }
 
     protected final void registerBroadcastReceiver(BroadcastReceiver r, IntentFilter f) {
@@ -288,34 +295,22 @@ public abstract class BaseToggle
         ToggleManager.log(msg, e);
     }
 
-    private void updateSettings() {
-        ContentResolver resolver = mContext.getContentResolver();
-
-        mCollapsePref = Settings.System.getBoolean(resolver,
-                Settings.System.SHADE_COLLAPSE_ALL, false);
-        mVibratePref = Settings.System.getBoolean(resolver,
-                Settings.System.QUICK_TOGGLE_VIBRATE, false);
-        mTactileFeedbackEnabled = Settings.System.getIntForUser(resolver,
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
-    }
-
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
             super(handler);
         }
 
         void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
+            ContentResolver cr = mContext.getContentResolver();
 
-            resolver.registerContentObserver(Settings.System
-                    .getUriFor(Settings.System.SHADE_COLLAPSE_ALL),
-                    false, this);
-            resolver.registerContentObserver(Settings.System
-                    .getUriFor(Settings.System.QUICK_TOGGLE_VIBRATE),
-                    false, this);
-            resolver.registerContentObserver(Settings.System
-                    .getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED),
-                    false, this);
+            cr.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHADE_COLLAPSE_ALL), false, this);
+            cr.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.TOGGLES_FLOATING_WINDOW), false, this);
+            cr.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUICK_TOGGLE_VIBRATE), false, this);
+            cr.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.HAPTIC_FEEDBACK_ENABLED), false, this);
 
             updateSettings();
         }
@@ -324,5 +319,18 @@ public abstract class BaseToggle
         public void onChange(boolean selfChange) {
             updateSettings();
         }
+    }
+
+    private void updateSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+
+        mCollapsePref = Settings.System.getBoolean(resolver,
+                Settings.System.SHADE_COLLAPSE_ALL, false);
+        mFloatingPref = Settings.System.getBoolean(resolver,
+                Settings.System.TOGGLES_FLOATING_WINDOW, false);
+        mVibratePref = Settings.System.getBoolean(resolver,
+                Settings.System.QUICK_TOGGLE_VIBRATE, false);
+        mTactileFeedbackEnabled = Settings.System.getIntForUser(resolver,
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
     }
 }

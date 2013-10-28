@@ -805,6 +805,8 @@
     <string name="emergency_calls_only" msgid="6733978304386365407">"Pouze tísňová volání"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Síť je blokována"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM karta je zablokována pomocí kódu PUK."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Další informace naleznete v uživatelské příručce; nebo kontaktujte zákaznickou podporu."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM karta je zablokována."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Odblokování SIM karty..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste použili nesprávné bezpečnostní gesto. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Již <xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně zadali heslo. "\n\n"Zkuste to znovu za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
@@ -1505,82 +1507,7 @@
     <string name="vibration_picker_title">Zvolit vibrační vzor</string>
     <string name="vibration_picker_del_title">Smazat vibrační vzor</string>
     <string name="notify_turn_wifi_off_title">Vypnout Wi-Fi</string>
-    <string name="notify_turn_wifi_ap_off_title">Vypnout Wi-Fi HOTSPOT</string>
-    <string name="toast_rotation_unlocked">Automatické otáčení obrazovky odemčeno</string>
-    <string name="toast_rotation_locked">Automatické otáčení obrazovky zamčeno</string>
     <string name="lockscreen_always_battery">Vybíjení, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
     <string name="lockscreen_always_low_battery">Připojte dobíjecí zařízení, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
     <string name="global_actions_toggle_navbar_hide">Ovládání navigační a stavové lišty</string>
-    <!-- Animation Strings -->
-    <string name="animation_fade">Slábnutí</string>
-    <string name="animation_slide_right">Zasunutí vpravo</string>
-    <string name="animation_slide_left">Zasunutí vlevo</string>
-    <string name="animation_slide_right_no_fade">Zasunutí vpravo (bez slábnutí)</string>
-    <string name="animation_slide_left_no_fade">Zasunutí vlevo (bez slábnutí)</string>
-    <string name="animation_slide_up">Zasunutí dospod</string>
-    <string name="animation_slide_down">Zasunutí navrch</string>
-    <string name="animation_default">Výchozí</string>
-    <string name="animation_translucent">Průhledná</string>
-    <string name="animation_grow_shrink">Růst (navrch)</string>
-    <string name="animation_grow_shrink_center">Růst (na střed)</string>
-    <string name="animation_grow_shrink_bottom">Růst (dospod)</string>
-    <string name="animation_grow_shrink_left">Růst (vlevo)</string>
-    <string name="animation_grow_shrink_right">Růst (vpravo)</string>
-
-    <!-- Awesome Action Stuff-->
-    <string name="action_home">Domů</string>
-    <string name="action_back">Zpět</string>
-    <string name="action_recents">Přepínač aplikací</string>
-    <string name="action_recents_gb">Přepínač aplikací (styl GB)</string>
-    <string name="action_search">Hledat</string>
-    <string name="action_screenshot">Snímek obrazovky</string>
-    <string name="action_menu">Menu</string>
-    <string name="action_ime">Otevřít metody vstupu</string>
-    <string name="action_kill">Ukončit aplikaci</string>
-    <string name="action_lastapp">Poslední aplikace</string>
-    <string name="action_power">Napájení</string>
-    <string name="action_notifications">Oznámení</string>
-    <string name="action_assist">Hledat (Google Now)</string>
-    <string name="action_clockoptions">Možnosti hodin</string>
-    <string name="action_voiceassist">Hlasové hledání</string>
-    <string name="action_torch">Svítilna</string>
-    <string name="action_silent">Hlasitě/Potichu</string>
-    <string name="action_vib">Hlasitě/Vibrace</string>
-    <string name="action_silent_vib">Hlasitě/Vibrace/Potichu</string>
-    <string name="action_event">Událost</string>
-    <string name="action_today">Dnes</string>
-    <string name="action_alarm">Budík</string>
-    <string name="action_null">Prázdné</string>
-    <string name="action_app">Vlastní aplikace/zástupce</string>
-    <string name="action_widgets">Navigační widgety</string>
-    <string name="action_app_window">Aplikační okno</string>
-    <string name="action_ribbon">AOKP Ribbon</string>
-    <string name="permlab_fm_radio_receiver">Ovládání FM přijímače</string>
-    <string name="permdesc_fm_radio_receiver">Umožnit aplikaci ovládat FM přijímač.</string>
-    <string name="permlab_fm_radio_transmitter">Ovládání FM vysílače</string>
-    <string name="permdesc_fm_radio_transmitter">Umožnit aplikace ovládat FM vysílač.</string>
-    <string name="permlab_revokePermissions">Umožnit zobrazit a editovat odmítnutá oprávnění. Není k dispozici normálním aplikacím.</string>
-    <string name="permdesc_revokePermissions">Umožnit čtení a zápis pro odmítnutá oprávnění. Není k dispozici normálním aplikacím.</string>
-    <string name="aerr_revoked_application">Aplikace <xliff:g id="application">%1$s</xliff:g> (proces <xliff:g id="process">%2$s</xliff:g>) byla neočekávaně ukončena.\nPOZOR!\nTato aplikace má jedno nebo více odmítnutých oprávnění, což může způsobovat problémy. Je třeba povlit oprávnění a zkusit znovu.</string>
-    <string name="aerr_revoked_process">Proces <xliff:g id="process">%1$s</xliff:g> byl neočekávaně ukončen.\nPOZOR!\nTento proces má jedno nebo více odmitnutých oprávnění, což může způsobovat problémy. Je třeba povolit oprávnění a zkusit znovu.</string>
-    <string name="reset_perms">Obnovit oprávnění</string>
-    <string name="lockscreen_perso_locked_message">SIM/RUIM je blokována</string>
-    <string name="msim_kg_sim_pin_msg_format">SUB:<xliff:g id="number">%d</xliff:g> : <xliff:g id="msg">%s</xliff:g>.</string>
-    <string name="msim_carrier_text_format"><xliff:g id="text_1">%s</xliff:g>, <xliff:g id="text_2">%s</xliff:g></string>
-    <string name="stk_cc_ussd_to_dial">Požadavek USSD upraven na DIAL požadavek.</string>
-    <string name="stk_cc_ussd_to_ss">Požadavek USSD upraven na SS požadavek.</string>
-    <string name="stk_cc_ussd_to_ussd">Požadavek USSD upraven na nový USSD požadavek.</string>
-    <string name="stk_cc_ss_to_dial">Požadavek SS upraven na DIAL požadavek.</string>
-    <string name="stk_cc_ss_to_ussd">Požadavek SS upraven na USSD požadavek.</string>
-    <string name="stk_cc_ss_to_ss">Požadavek SS upraven na nový SS požadavek.</string>
-    <string name="enablePin">Neúspěšné. Zapnout blokaci SIM/RUIM.</string>
-    <string name="keyguard_password_wrong_puk_code">Nesprávný kód PUK!</string>
-    <string name="keyguard_password_pin_failed">Operace s PINem selhala!</string>
-    <string name="keyguard_password_puk_failed">Operace s PUKem selhala!</string>
-    <string name="keyguard_pin_accepted">Kód přijat!</string>
-    <string name="pinpuk_attempts">\nZbývajících pokusů :</string>
-    <string name="lockscreen_sim_puk_locked_instructions">PIN1 zablokován. Vložte PUK1.\nnebo\nDalší informace naleznete v uživatelské příručce; nebo kontaktujte zákaznickou podporu.</string>
-    <string name="lockscreen_sim_locked_message">SIM/RUIM karta zablokována.</string>
-    <string name="lockscreen_sim_error_message_short">Vadná karta.</string>
-    <string name="lockscreen_sim_error_message">SIM karta je vadná.</string>
 </resources>

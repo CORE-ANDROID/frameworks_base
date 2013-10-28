@@ -102,6 +102,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.Environment;
@@ -127,6 +128,7 @@ import android.os.SystemProperties;
 import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Telephony.Sms.Intents;
 import android.text.format.Time;
 import android.util.EventLog;
 import android.util.Log;
@@ -701,6 +703,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     boolean mProcessesReady = false;
     boolean mSystemReady = false;
     boolean mBooting = false;
+    ConditionVariable mBootingCondition = new ConditionVariable();
     boolean mWaitingUpdate = false;
     boolean mDidUpdate = false;
     boolean mOnBattery = false;
@@ -933,6 +936,9 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static final int USER_SWITCH_TIMEOUT_MSG = 36;
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
 
+    static final int POST_PRIVACY_NOTIFICATION_MSG = 40;
+    static final int CANCEL_PRIVACY_NOTIFICATION_MSG = 41;
+
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
     static final int FIRST_COMPAT_MODE_MSG = 300;
@@ -951,12 +957,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
         //public Handler() {
         //    if (localLOGV) Slog.v(TAG, "Handler started!");
         //}
-
-        private boolean isRevokeEnabled() {
-            return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
-                    android.provider.Settings.Secure.ENABLE_PERMISSIONS_MANAGEMENT,
-                    0) == 1;
-        }
 
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -984,23 +984,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
                         return;
                     }
                     if (mShowDialogs && !mSleeping && !mShuttingDown) {
-                        boolean hasRevoked = false;
-                        if (isRevokeEnabled()) {
-                            for (String s: proc.pkgList) {
-                                try {
-                                    String[] perms = AppGlobals.getPackageManager().getRevokedPermissions(s);
-                                    if (perms != null && perms.length > 0) {
-                                        hasRevoked = true;
-                                        break;
-                                    }
-                                }
-                                catch (RemoteException e) {
-                                    // just ignore this.
-                                }
-                            }
-                        }
                         Dialog d = new AppErrorDialog(getUiContext(),
-                                ActivityManagerService.this, res, proc, hasRevoked);
+                                ActivityManagerService.this, res, proc);
                         d.show();
                         proc.crashDialog = d;
                     } else {
@@ -1439,6 +1424,69 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 }
                 break;
             }
+            case POST_PRIVACY_NOTIFICATION_MSG: {
+                INotificationManager inm = NotificationManager.getService();
+                if (inm == null) {
+                    return;
+                }
+
+                ActivityRecord root = (ActivityRecord)msg.obj;
+                ProcessRecord process = root.app;
+                if (process == null) {
+                    return;
+                }
+
+                try {
+                    Context context = mContext.createPackageContext(process.info.packageName, 0);
+                    String text = mContext.getString(R.string.privacy_guard_notification_detail,
+                            context.getApplicationInfo().loadLabel(context.getPackageManager()));
+                    String title = mContext.getString(R.string.privacy_guard_notification);
+
+                    Intent infoIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", root.packageName, null));
+
+                    Notification notification = new Notification();
+                    notification.icon = com.android.internal.R.drawable.stat_notify_privacy_guard;
+                    notification.when = 0;
+                    notification.flags = Notification.FLAG_ONGOING_EVENT;
+                    notification.priority = Notification.PRIORITY_LOW;
+                    notification.defaults = 0;
+                    notification.sound = null;
+                    notification.vibrate = null;
+                    notification.setLatestEventInfo(getUiContext(),
+                            title, text,
+                            PendingIntent.getActivityAsUser(mContext, 0, infoIntent,
+                                    PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                    new UserHandle(root.userId)));
+
+                    try {
+                        int[] outId = new int[1];
+                        inm.enqueueNotificationWithTag("android", "android", null,
+                                R.string.privacy_guard_notification,
+                                notification, outId, root.userId);
+                    } catch (RuntimeException e) {
+                        Slog.w(ActivityManagerService.TAG,
+                                "Error showing notification for privacy guard", e);
+                    } catch (RemoteException e) {
+                    }
+                } catch (NameNotFoundException e) {
+                    Slog.w(TAG, "Unable to create context for privacy guard notification", e);
+                }
+            } break;
+            case CANCEL_PRIVACY_NOTIFICATION_MSG: {
+                INotificationManager inm = NotificationManager.getService();
+                if (inm == null) {
+                    return;
+                }
+                try {
+                    inm.cancelNotificationWithTag("android", null,
+                            R.string.privacy_guard_notification, msg.arg1);
+                } catch (RuntimeException e) {
+                    Slog.w(ActivityManagerService.TAG,
+                            "Error canceling notification for service", e);
+                } catch (RemoteException e) {
+                }
+            } break;
             }
         }
     };
@@ -3302,7 +3350,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
             final File tracesFile = new File(tracesPath);
             final File tracesDir = tracesFile.getParentFile();
             final File tracesTmp = new File(tracesDir, "__tmp__");
-            FileOutputStream fos = null;
             try {
                 if (!tracesDir.exists()) {
                     tracesFile.mkdirs();
@@ -3324,23 +3371,16 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 TimeUtils.formatDuration(SystemClock.uptimeMillis()-startTime, sb);
                 sb.append(" since ");
                 sb.append(msg);
-                fos = new FileOutputStream(tracesFile);
+                FileOutputStream fos = new FileOutputStream(tracesFile);
                 fos.write(sb.toString().getBytes());
                 if (app == null) {
                     fos.write("\n*** No application process!".getBytes());
                 }
+                fos.close();
+                FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
             } catch (IOException e) {
                 Slog.w(TAG, "Unable to prepare slow app traces file: " + tracesPath, e);
                 return;
-            } finally {
-                try {
-                    if (fos != null) {
-                        fos.close();
-                    }
-                    FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
-                } catch (IOException ignored) {
-                    // let it go
-                }
             }
 
             if (app != null) {
@@ -4550,7 +4590,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 mUiContext = null;
             }
         });
-
+        
         synchronized (this) {
             // Ensure that any processes we had put on hold are now started
             // up.
@@ -4668,6 +4708,17 @@ public final class ActivityManagerService  extends ActivityManagerNative
             ActivityRecord r = getCallingRecordLocked(token);
             return r != null ? r.intent.getComponent() : null;
         }
+    }
+
+    public String getCallingPackageForBroadcast(boolean foreground) {
+        BroadcastQueue queue = foreground ? mFgBroadcastQueue : mBgBroadcastQueue;
+        BroadcastRecord r = queue.getProcessingBroadcast();
+        if (r != null) {
+            return r.callerPackage;
+        } else {
+            Log.e(TAG, "Broadcast sender is only retrievable in the onReceive");
+        }
+        return null;
     }
 
     private ActivityRecord getCallingRecordLocked(IBinder token) {
@@ -7691,6 +7742,30 @@ public final class ActivityManagerService  extends ActivityManagerNative
         }
     }
 
+    public boolean isPrivacyGuardEnabledForProcess(int pid) {
+        ProcessRecord proc;
+        synchronized (mPidsSelfLocked) {
+            proc = mPidsSelfLocked.get(pid);
+        }
+        if (proc == null) {
+            return false;
+        }
+        try {
+            return AppGlobals.getPackageManager().getPrivacyGuardSetting(
+                    proc.info.packageName, proc.userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+        return false;
+    }
+
+    public boolean isFilteredByPrivacyGuard(String intent) {
+        return  Intents.SMS_RECEIVED_ACTION.equals(intent) ||
+                Intents.DATA_SMS_RECEIVED_ACTION.equals(intent) ||
+                Intents.SMS_EMERGENCY_CB_RECEIVED_ACTION.equals(intent) ||
+                Intents.SMS_CB_RECEIVED_ACTION.equals(intent);
+    }
+
     public void registerProcessObserver(IProcessObserver observer) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerProcessObserver()");
@@ -8250,6 +8325,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
             // Start up initial activity.
             mBooting = true;
+            mBootingCondition.open();
             
             try {
                 if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
@@ -8425,7 +8501,8 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 // Also terminate any activities below it that aren't yet
                 // stopped, to avoid a situation where one will get
                 // re-start our crashing activity once it gets resumed again.
-                index--;
+                while (index >= mMainStack.mHistory.size())
+                    index--;
                 if (index >= 0) {
                     r = (ActivityRecord)mMainStack.mHistory.get(index);
                     if (r.state == ActivityState.RESUMED
@@ -9004,15 +9081,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
             }
             if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
                 appErrorIntent = createAppErrorIntentLocked(r, timeMillis, crashInfo);
-            } else if (res == AppErrorDialog.FORCE_QUIT_AND_RESET_PERMS) {
-                for (String pkg: r.pkgList) {
-                    long oldId = Binder.clearCallingIdentity();
-                    try {
-                        AppGlobals.getPackageManager().setRevokedPermissions(pkg, new String[0]);
-                    } catch (RemoteException e) {
-                    }
-                    Binder.restoreCallingIdentity(oldId);
-                }
             }
         }
 

@@ -227,7 +227,11 @@ interface IPackageManager {
 
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
-    
+
+    boolean getPrivacyGuardSetting(in String packageName, int userId);
+
+    void setPrivacyGuardSetting(in String packageName, boolean enabled, int userId);
+
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
      */
@@ -402,7 +406,4 @@ interface IPackageManager {
 
     /** Reflects current DeviceStorageMonitorService state */
     boolean isStorageLow();
-
-    String[] getRevokedPermissions(String packageName);
-    void setRevokedPermissions(String packageName, in String[] perms);
 }

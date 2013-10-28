@@ -35,7 +35,6 @@
 #include <linux/ioctl.h>
 #include <utils/Vector.h>
 #include <utils/String8.h>
-#include <cutils/properties.h>
 
 namespace android {
 
@@ -192,19 +191,6 @@ static void setIntField(JNIEnv* env, jobject obj, const String8& path, jfieldID 
     env->SetIntField(obj, fieldID, value);
 }
 
-static void setIntFieldMax(JNIEnv* env, jobject obj, const String8& path, jfieldID fieldID, int maxValue)
-{
-    const int SIZE = 128;
-    char buf[SIZE];
-
-    jint value = 0;
-    if (readFromFile(path, buf, SIZE) > 0) {
-        value = atoi(buf);
-    }
-    if (value > maxValue) value = maxValue;
-    env->SetIntField(obj, fieldID, value);
-}
-
 static void setVoltageField(JNIEnv* env, jobject obj, const String8& path, jfieldID fieldID)
 {
     const int SIZE = 128;
@@ -243,8 +229,8 @@ static PowerSupplyType readPowerSupplyType(const String8& path) {
 static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
 {
     setBooleanField(env, obj, gPaths.batteryPresentPath, gFieldIds.mBatteryPresent);
-
-    setIntFieldMax(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel, 100);
+    
+    setIntField(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel);
     setVoltageField(env, obj, gPaths.batteryVoltagePath, gFieldIds.mBatteryVoltage);
     setIntField(env, obj, gPaths.batteryTemperaturePath, gFieldIds.mBatteryTemperature);
     
@@ -352,20 +338,7 @@ int register_android_server_BatteryService(JNIEnv* env)
                 if (access(path, R_OK) == 0)
                     gPaths.batteryPresentPath = path;
                 path.clear();
-                /* For some weird, unknown reason Motorola phones provide
-                * capacity information only in 10% steps in the 'capacity'
-                * file. The 'charge_counter' file provides the 1% steps
-                * on those phones. Since using charge_counter has issues
-                * on some devices, we'll use ro.product.use_charge_counter
-                * in build.prop to decide which capacity file to use.
-                */
-                char valueChargeCounter[PROPERTY_VALUE_MAX];
-                if (property_get("ro.product.use_charge_counter", valueChargeCounter, NULL)
-                    && (!strcmp(valueChargeCounter, "1"))) {
-                   path.appendFormat("%s/%s/charge_counter", POWER_SUPPLY_PATH, name);
-                } else {
-                    path.appendFormat("%s/%s/capacity", POWER_SUPPLY_PATH, name);
-                }
+                path.appendFormat("%s/%s/capacity", POWER_SUPPLY_PATH, name);
                 if (access(path, R_OK) == 0)
                     gPaths.batteryCapacityPath = path;
 

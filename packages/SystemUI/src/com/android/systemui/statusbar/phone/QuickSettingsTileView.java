@@ -21,6 +21,9 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 /**
  *
@@ -47,10 +50,5 @@ public class QuickSettingsTileView extends RelativeLayout {
 
     public void setContent(int layoutId, LayoutInflater inflater) {
         inflater.inflate(layoutId, this);
-    }
-
-    @Override
-    public void setVisibility(int vis) {
-        super.setVisibility(vis);
     }
 }

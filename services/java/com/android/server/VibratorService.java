@@ -206,8 +206,6 @@ public class VibratorService extends IVibratorService.Stub
             return;
         }
 
-        milliseconds = userDuration(milliseconds);
-
         Vibration vib = new Vibration(token, milliseconds, uid, packageName);
 
         final long ident = Binder.clearCallingIdentity();
@@ -231,16 +229,6 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
         return true;
-    }
-
-    private long userDuration(long millis) {
-        int userMillis = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.GENERIC_VIBRATE_INTENSITY, 0);
-        // Set length if <userMillis and all small vibrations
-        if (userMillis != 0 && (millis <= userMillis || millis <= 35)) {
-            millis = userMillis;
-        }
-        return millis;
     }
 
     public void vibratePattern(int uid, String packageName, long[] pattern, int repeat,
@@ -486,8 +474,6 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private void doVibratorOn(long millis, int uid) {
-        millis = userDuration(millis);
-
         synchronized (mInputDeviceVibrators) {
             try {
                 mBatteryStatsService.noteVibratorOn(uid, millis);
@@ -624,7 +610,7 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
     };
-
+    
     private boolean inQuietHours() {
         boolean quietHoursEnabled = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.QUIET_HOURS_ENABLED, 0) != 0;
@@ -634,10 +620,7 @@ public class VibratorService extends IVibratorService.Stub
                 Settings.System.QUIET_HOURS_END, 0);
         boolean quietHoursVibrate = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.QUIET_HOURS_STILL, 0) != 0;
-        if (quietHoursEnabled && quietHoursVibrate) {
-            if (quietHoursStart == quietHoursEnd) {
-                return true;
-            }
+        if (quietHoursEnabled && quietHoursVibrate && (quietHoursStart != quietHoursEnd)) {
             // Get the date in "quiet hours" format.
             Calendar calendar = Calendar.getInstance();
             int minutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);

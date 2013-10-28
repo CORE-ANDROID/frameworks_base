@@ -4954,10 +4954,15 @@ public class WindowManagerService extends IWindowManager.Stub
         return new float[] { mWindowAnimationScale, mTransitionAnimationScale,
                 mAnimatorDurationScale };
     }
-
-    @Override
+    
+    // Called by window manager policy.  Not exposed externally.
     public void reboot(String reason) {
         ShutdownThread.reboot(getUiContext(), reason, false);
+    }
+
+    // Called by window manager policy.  Not exposed externally.
+    public void rebootTile() {
+        ShutdownThread.reboot(mContext, null, true);
     }
 
     // Called by window manager policy. Not exposed externally.
@@ -4995,7 +5000,7 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.shutdown(getUiContext(), confirm);
     }
 
-    // Called by window manager policy. Not exposed externally.
+    // Called by window manager policy.  Not exposed externally.
     @Override
     public void rebootSafeMode(boolean confirm) {
         ShutdownThread.rebootSafeMode(getUiContext(), confirm);
@@ -6538,7 +6543,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Determine whether a hard keyboard is available and enabled.
             boolean hardKeyboardAvailable = false;
             if (!mForceDisableHardwareKeyboard) {
-                hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+                mHardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
             }
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
@@ -8992,33 +8997,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ORIENTATION &&
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                         TAG, "Resizing " + win + " WITH DRAW PENDING");
-                final boolean reportDraw
-                        = winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
-                final Configuration newConfig = configChanged ? win.mConfiguration : null;
-                if (win.mClient instanceof IWindow.Stub) {
-                    // Simulate one-way call if win.mClient is a local object.
-                    final IWindow client = win.mClient;
-                    final Rect frame = win.mFrame;
-                    final Rect overscanInsets = win.mLastOverscanInsets;
-                    final Rect contentInsets = win.mLastContentInsets;
-                    final Rect visibleInsets = win.mLastVisibleInsets;
-                    mH.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                client.resized(frame, overscanInsets, contentInsets, visibleInsets,
-                                               reportDraw, newConfig);
-                            } catch (RemoteException e) {
-                                // Actually, it's not a remote call.
-                                // RemoteException mustn't be raised.
-                            }
-                        }
-                    });
-                } else {
-                    win.mClient.resized(win.mFrame, win.mLastOverscanInsets, win.mLastContentInsets,
-                                        win.mLastVisibleInsets,
-                                        reportDraw, newConfig);
-                }
+                win.mClient.resized(win.mFrame, win.mLastOverscanInsets, win.mLastContentInsets,
+                        win.mLastVisibleInsets,
+                        winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
+                        configChanged ? win.mConfiguration : null);
                 win.mOverscanInsetsChanged = false;
                 win.mContentInsetsChanged = false;
                 win.mVisibleInsetsChanged = false;

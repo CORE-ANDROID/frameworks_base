@@ -301,7 +301,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                         int len = file.read(buffer, 0, 1024);
                         file.close();
                         curState = validateSwitchState(
-                                Integer.valueOf((new String(buffer, 0, len)).trim()));
+                        		Integer.valueOf((new String(buffer, 0, len)).trim()));
 
                         if (curState > 0) {
                             updateStateLocked(uei.getDevPath(), uei.getDevName(), curState);
@@ -323,7 +323,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                 startObserving("DEVPATH="+uei.getDevPath());
             }
         }
-
+        
         private int validateSwitchState(int state) {
             // Some drivers, namely HTC headset ones, add additional bits to
             // the switch state. As we only are able to deal with the states

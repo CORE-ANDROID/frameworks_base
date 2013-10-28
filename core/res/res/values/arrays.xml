@@ -417,7 +417,7 @@
         <item>TUV</item><!-- 8 -->
         <item>WXYZ</item><!-- 9 -->
     </string-array>
-
+    
     <!-- reboot options -->
     <string-array name="reboot_options">
         <item>@string/reboot</item>

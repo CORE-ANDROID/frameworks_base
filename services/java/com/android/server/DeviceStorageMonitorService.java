@@ -17,7 +17,6 @@
 package com.android.server;
 
 import com.android.internal.app.ThemeUtils;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -90,8 +89,9 @@ public class DeviceStorageMonitorService extends Binder {
     private boolean mLowMemFlag=false;
     private boolean mMemFullFlag=false;
     private Context mContext;
-    private Context mUiContext;
     private ContentResolver mResolver;
+    private Context mUiContext;
+    private ContentResolver mContentResolver;
     private long mTotalMemory;  // on /data
     private StatFs mDataFileStats;
     private StatFs mSystemFileStats;

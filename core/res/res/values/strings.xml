@@ -97,8 +97,6 @@
          the SIM card. -->
     <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
     <string name="needPuk2">Type PUK2 to unblock SIM card.</string>
-    <!-- Displayed when user attempts to change SIM PIN1 without enabling PIN1. -->
-    <string name="enablePin">Unsuccessful. Enable SIM/RUIM Lock.</string>
     <!-- Title for the dialog used to display the user's IMEI number [CHAR LIMIT=10] -->
     <string name="imei">IMEI</string>
 
@@ -377,12 +375,6 @@
     <!-- status message in phone options dialog for when airplane mode is off -->
     <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
 
-    <!-- label for item that screenshots in phone options dialog -->
-    <string name="global_action_screenshot">Screenshot</string>
-
-    <!-- label for item that torches in phone options dialog -->
-    <string name="global_action_torch">Torch</string>
-
     <!-- label for item that toggles NavBar Hide -->
     <string name="global_actions_toggle_navbar_hide">Navigation and Status Bar Controls</string>
 
@@ -582,10 +574,6 @@
         card numbers and passwords.</string>
 
     <!--  Permissions -->
-
-    <!-- Superuser application permission, allows applications to call the superuser binary (su) -->
-    <string name="permlab_accessSuperuser">full permissions to all device features and storage</string>
-    <string name="permdesc_accessSuperuser">Superuser grants full access to all device features and storage, including the secure and sensitive hardware elements of your device. This permission is potentially dangerous.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_statusBar">disable or modify status bar</string>
@@ -1469,21 +1457,6 @@
     <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fm_radio_receiver">control FM receiver</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fm_radio_receiver">Allows the application to control
-        the FM receiver.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allo w the application to do this. -->	
-    <string name="permlab_sendMockSms">Send mock SMS messages</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want t o allow the application to do this. -->
-    <string name="permdesc_sendMockSms">Allows the app to send mock SMS messages.
-        This allows an app send SMS to trusted applications. Malicious apps could send messages.
-    </string>
-
-    <string name="permdesc_fm_radio_transmitter">Allows the application to control
-        the FM transmitter.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_flashlight">control flashlight</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_flashlight">Allows the app to control the flashlight.</string>
@@ -1871,11 +1844,6 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindNotificationListenerService">Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps.</string>
 
-    <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
-    <string name="permlab_revokePermissions">Allows view and edit of revoked permissions. Not for use by normal applications.</string>
-    <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
-    <string name="permdesc_revokePermissions">Allows read and write for revoked permissions. Not for use by normal applications.</string>
-
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->
@@ -2166,25 +2134,6 @@
          to unlock the keyguard.  Displayed in one line in a large font.  -->
     <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
 
-    <!-- Instructions telling the user that they entered the wrong puk while trying
-         to unlock the keyguard.  Displayed in one line in a large font.  -->
-    <string name="keyguard_password_wrong_puk_code">Incorrect PUK code!</string>
-
-    <!-- Instructions telling the user that the operation to unlock the keyguard
-         with PIN failed. Displayed in one line in a large font.  -->
-    <string name="keyguard_password_pin_failed">PIN operation failed!</string>
-
-    <!-- Instructions telling the user that the operation to unlock the keyguard
-         with PUK failed. Displayed in one line in a large font.  -->
-    <string name="keyguard_password_puk_failed">PUK operation failed!</string>
-
-
-    <!-- Notification telling the user that the PIN1 they entered is valid -->
-    <string name="keyguard_pin_accepted">Code Accepted!</string>
-
-    <!-- Displayed when a SIM PIN/PUK is entered incorrectly. -->
-    <string name="pinpuk_attempts">\nAttempts Remaining :</string>
-
     <!-- Instructions telling the user how to unlock the phone. -->
     <string name="keyguard_label_text">To unlock, press Menu then 0.</string>
 
@@ -2267,27 +2216,20 @@
 
     <!-- Shown in the lock screen when there is emergency calls only mode. -->
     <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
-    <!-- Shown in the lock screen when there is SIM card IO error. -->
-    <string name="lockscreen_sim_error_message_short">Invalid Card.</string>
-    <!-- Shown in the lock screen when there is SIM card error. -->
-    <string name="lockscreen_sim_error_message">SIM card is Invalid.</string>
-
 
     <!-- When the user inserts a sim card from an unsupported network, it becomes network
          locked -->
     <string name="lockscreen_network_locked_message">Network locked</string>
 
-    <!-- When the user inserts a sim card with some personalization enabled -->
-    <string name="lockscreen_perso_locked_message">SIM/RUIM is Perso locked</string>
 
     <!-- When the user enters a wrong sim pin too many times, it becomes
          PUK locked (Pin Unlock Kode) -->
     <string name="lockscreen_sim_puk_locked_message">SIM card is PUK-locked.</string>
     <!-- Shown in the lock screen when the SIM has become PUK locked and the user must call customer care to unlock it. -->
-    <string name="lockscreen_sim_puk_locked_instructions">PIN1 Blocked. Enter PUK1.\nor\nPlease see the User Guide or contact Customer Care.</string>
+    <string name="lockscreen_sim_puk_locked_instructions">See the User Guide or contact Customer Care.</string>
 
-    <!-- Shown in the lock screen to tell the user that their SIM/RUIM is locked and they must unlock it. -->
-    <string name="lockscreen_sim_locked_message">SIM/RUIM card is locked.</string>
+    <!-- Shown in the lock screen to tell the user that their SIM is locked and they must unlock it. -->
+    <string name="lockscreen_sim_locked_message">SIM card is locked.</string>
 
     <!-- For the unlock screen, When the user enters a sim unlock code, it takes a little while to check
          whether it is valid, and to unlock the sim if it is valid.  we display a
@@ -3134,12 +3076,6 @@
     <string name="aerr_process">Unfortunately, the process <xliff:g id="process">%1$s</xliff:g> has
         stopped.</string>
     <!-- Title of the alert when an application is not responding. -->
-    <string name="aerr_revoked_application">The application <xliff:g id="application">%1$s</xliff:g>
-        (process <xliff:g id="process">%2$s</xliff:g>) has stopped unexpectedly.\nWARNING!\nThis application has one or more of its permissions REVOKED which may cause it to malfunction. Please grant its permissions and try again.</string>
-    <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_revoked_process">The process <xliff:g id="process">%1$s</xliff:g> has
-        stopped unexpectedly.\nWARNING!\nThis process has one or more of its permissions REVOKED which may cause it to malfunction. Please grant its permissions and try again.</string>
-    <!-- Title of the alert when an application is not responding. -->
     <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
     <string name="anr_activity_application"><xliff:g id="application">%2$s</xliff:g> isn\'t responding.\n\nDo you want to close it?</string>
@@ -3155,8 +3091,6 @@
     <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
-    <!-- Button allowing the user reset the revoked permissions for application which has encountered an error. -->
-    <string name="reset_perms">Reset permissions</string>
     <!-- Text of the alert that is displayed when a web page is not responding. [CHAR-LIMIT=NONE] -->
     <string name="webpage_unresponsive">The page has become unresponsive.\n\nDo you want to close it?</string>
     <!-- [CHAR LIMIT=25] Title of the alert when application launches on top of another. -->
@@ -3980,7 +3914,7 @@
     <string name="SetupCallDefault">Accept call?</string>
 
     <!-- Long-press back kill application -->
-    <string name="app_killed_message">Application killed</string>
+    <string name="app_killed_message">Feeling lucky? Punk!</string>
 
     <!-- Title for a button to choose the currently selected activity
          as the default in the activity resolver. [CHAR LIMIT=25] -->
@@ -4019,7 +3953,7 @@
 
     <!-- "Done" button for MediaRouter chooser dialog when grouping routes. [CHAR LIMIT=NONE] -->
     <string name="media_route_chooser_grouping_done">Done</string>
-
+    
     <!-- Reboot -->
     <string name="reboot">Reboot</string>
 
@@ -4200,6 +4134,17 @@
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
+    
+    <!-- label for item that screenshots in phone options dialog -->
+    <string name="global_action_screenshot">Screenshot</string>
+    
+    <!-- label for item that toggles expand desktop mode -->
+    <string name="global_actions_toggle_expanded_desktop_mode">Expanded desktop</string>
+    <!-- status message in phone options dialog for when expand desktop mode is on -->
+    <string name="global_actions_expanded_desktop_mode_on_status">Enabled</string>
+    <!-- status message in phone options dialog for when expand desktop mode is off -->
+    <string name="global_actions_expanded_desktop_mode_off_status">Disabled</string>
+    
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
     <!-- Message informing user that app is not permitted to access accounts. [CHAR LIMIT=none] -->
@@ -4207,20 +4152,53 @@
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
-
+    
+    <!-- XenonHD ADDITIONS START -->
+    
     <!-- Vibration picker dialog title -->
     <string name="vibration_picker_title">Select vibration</string>
     <string name="vibration_picker_del_title">Delete vibration</string>
+    
+    <!-- Privacy Guard -->
+    <string name="permlab_changePrivacyGuardState">enable or disable privacy guard</string>
+    <string name="permdesc_changePrivacyGuardState">Allows the application to change whether another application runs with Privacy Guard. When an application is running with Privacy Guard, it will not have access to personal data such as contacts, call logs, or messages.</string>
+    <string name="privacy_guard_notification">Privacy Guard active</string>
+    <string name="privacy_guard_notification_detail"><xliff:g id="app">%1$s</xliff:g> will not be able to access personal data</string>
 
-    <!-- In WiFi notification -->
-    <string name="notify_turn_wifi_off_title">Turn Wi-Fi off</string>
+	<!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_interceptSmsSent">intercept outgoing SMS</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_interceptSmsSent">Allows the app to
+        intercept an outgoing SMS.
+        Malicious apps may use this to prevent outgoing SMS messages.</string>
 
-    <!-- In WiFi AP notification -->
-    <string name="notify_turn_wifi_ap_off_title">Turn Wi-Fi AP off</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_cancelNotifications">cancel application notifications</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_cancelNotifications">Allows the app to cancel notifications created by other apps.</string>
 
-    <!-- Hardware Rotation lock string -->
-    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
-    <string name="toast_rotation_locked">Display rotation locked</string>
+    <!-- label for item that reboots the phone in phone options dialog -->
+    <string name="global_action_reboot">Reboot</string>
+
+    <!-- label for item that opens the profile choosing dialog -->
+    <string name="global_action_choose_profile">Profile</string>
+    
+    <string name="quick_settings_powermenu">Power Menu</string>
+
+    <!--CM Profiles -->
+    <!-- Names of default profiles. -->
+    <string name="profileNameDefault">Default</string>
+    <string name="profileNameWork">Work</string>
+    <string name="profileNameHome">Home</string>
+    <string name="profileNameSilent">Silent</string>
+    <string name="profileNameNight">Night</string>
+
+    <!-- Names of application groups. -->
+    <string name="profileGroupPhone">Phone</string>
+    <string name="profileGroupCalendar">Calendar</string>
+    <string name="profileGroupGmail">Gmail</string>
+    <string name="profileGroupEmail">Email</string>
+    <string name="profileGroupSMS">SMS</string>
 
     <!-- Animation Strings -->
     <string name="animation_fade">Fade</string>
@@ -4238,7 +4216,7 @@
     <string name="animation_grow_shrink_left">Grow in (Left)</string>
     <string name="animation_grow_shrink_right">Grow in (Right)</string>
 
-
+    
     <!-- Awesome Action Stuff-->
     <string name="action_home">Home</string>
     <string name="action_back">Back</string>
@@ -4267,28 +4245,11 @@
     <string name="action_null">Blank</string>
     <string name="action_widgets">Nav Widgets</string>
     <string name="action_app_window">App Window</string>
-    <string name="action_ribbon">AOKP Ribbon</string>
+    <string name="action_ribbon">Ribbon</string>
     <string name="action_app">Custom App/Shortcut</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_interceptSmsSent">intercept outgoing SMS</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_interceptSmsSent">Allows the app to intercept an outgoing SMS.
-        Malicious apps may use this to prevent outgoing SMS messages.</string>
+    <!-- In WiFi notification -->
+    <string name="notify_turn_wifi_off_title">Turn Wi-Fi off</string>
 
-    <!-- Displayed when the USSD/SS request is modified by STK CC to a
-    different request. This will be displayed in a toast. -->
-    <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
-    <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
-    <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
-    <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
-    <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
-    <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
-
-    <!-- Multi SIM related -->
-    <!-- Message used in Multi SIM enabled SIM PIN view -->
-    <string name="msim_kg_sim_pin_msg_format">SUB:<xliff:g id="number">%d</xliff:g> : <xliff:g id="msg">%s</xliff:g>.</string>
-
-    <!-- Carrier text used in Multi SIM enabled view -->
-    <string name="msim_carrier_text_format"><xliff:g id="text_1">%s</xliff:g>, <xliff:g id="text_2">%s</xliff:g></string>
+	<!-- XenonHD ADDITIONS END -->
 </resources>

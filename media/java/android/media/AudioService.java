@@ -64,7 +64,6 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
-import android.provider.Settings.SettingNotFoundException;
 import android.speech.RecognizerIntent;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -187,8 +186,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /** @see VolumeStreamState */
     private VolumeStreamState[] mStreamStates;
     private SettingsObserver mSettingsObserver;
-    //nodelay in a2dp
-    private boolean noDelayInATwoDP = Resources.getSystem().getBoolean(com.android.internal.R.bool.config_noDelayInATwoDP);
 
     private int mMode;
     // protects mRingerMode
@@ -440,8 +437,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     final int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_AUX_DIGITAL |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET |
-            AudioSystem.DEVICE_OUT_ALL_USB |
-            AudioSystem.DEVICE_OUT_PROXY;
+            AudioSystem.DEVICE_OUT_ALL_USB;
 
     // TODO merge orientation and rotation
     private final boolean mMonitorOrientation;
@@ -528,8 +524,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
                 new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
-        if (noDelayInATwoDP)
-            intentFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
@@ -538,7 +532,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        intentFilter.addAction(Intent.ACTION_WIFI_DISPLAY_AUDIO);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
@@ -765,7 +758,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     UserHandle.USER_CURRENT);
 
             readDockAudioSettings(cr);
-            updateManualSafeMediaVolume();
         }
         boolean linkNotificationWithVolume = Settings.System.getInt(mContentResolver,
                 Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
@@ -1168,7 +1160,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // UI update and Broadcast Intent
     private void sendMasterVolumeUpdate(int flags, int oldVolume, int newVolume) {
-        mVolumePanel.postMasterVolumeChanged(flags);
+        masterVolumeChanged(flags);
 
         Intent intent = new Intent(AudioManager.MASTER_VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_PREV_MASTER_VOLUME_VALUE, oldVolume);
@@ -1178,7 +1170,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
-        mVolumePanel.postMasterMuteChanged(flags);
+        masterMuteChanged(flags);
         broadcastMasterMuteStatus(muted);
     }
 
@@ -1942,9 +1934,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
-        if (!checkAudioSettingsPermission("setBluetoothA2dpOn()") && noDelayInATwoDP) {
-            return;
-        }
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
             sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
@@ -2283,21 +2272,17 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 deviceList = a2dp.getConnectedDevices();
                 if (deviceList.size() > 0) {
                     btDevice = deviceList.get(0);
-                    if (!noDelayInATwoDP){
-		                synchronized (mConnectedDevices) {
-		                    int state = a2dp.getConnectionState(btDevice);
-		                    int delay = checkSendBecomingNoisyIntent(
-		                                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-		                                            (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
-		                    queueMsgUnderWakeLock(mAudioHandler,
-		                            MSG_SET_A2DP_CONNECTION_STATE,
-		                            state,
-		                            0,
-		                            btDevice,
-		                            delay);
-                        }
-                    } else {
-                        onSetA2dpConnectionState(btDevice, a2dp.getConnectionState(btDevice));
+                    synchronized (mConnectedDevices) {
+                        int state = a2dp.getConnectionState(btDevice);
+                        int delay = checkSendBecomingNoisyIntent(
+                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                                (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+                        queueMsgUnderWakeLock(mAudioHandler,
+                                MSG_SET_A2DP_CONNECTION_STATE,
+                                state,
+                                0,
+                                btDevice,
+                                delay);
                     }
                 }
                 break;
@@ -2420,6 +2405,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
                             setSafeMediaVolumeEnabled(true);
                             mMusicActiveMs = 0;
+                            displaySafeVolumeWarning();
                         }
                     }
                 }
@@ -2736,19 +2722,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state)
     {
         int delay;
-        if(!noDelayInATwoDP) {
-		    synchronized (mConnectedDevices) {
-		        delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-		                                        (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
-		        queueMsgUnderWakeLock(mAudioHandler,
-		                MSG_SET_A2DP_CONNECTION_STATE,
-		                state,
-		                0,
-		                device,
-		                delay);
-            }
-        } else {
-            delay = 0;
+        synchronized (mConnectedDevices) {
+            delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                            (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+            queueMsgUnderWakeLock(mAudioHandler,
+                    MSG_SET_A2DP_CONNECTION_STATE,
+                    state,
+                    0,
+                    device,
+                    delay);
         }
         return delay;
     }
@@ -3669,8 +3651,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
-            mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.MANUAL_SAFE_MEDIA_VOLUME), false, this);
         }
 
         @Override
@@ -3714,7 +3694,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
                 }
                 readDockAudioSettings(mContentResolver);
-                updateManualSafeMediaVolume();
             }
         }
     }
@@ -3739,8 +3718,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceUnavailableNow(String address) {
-        if (noDelayInATwoDP)
-            onSendBecomingNoisyIntent();
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 address);
@@ -4185,22 +4162,64 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         0,
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
-            } else if (action.equals(Intent.ACTION_WIFI_DISPLAY_AUDIO)) {
-                state = intent.getIntExtra("state", 0);
-                Log.v(TAG, "WiFi Display device state "+state);
-                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_PROXY);
-                if(state == 1 && !isConnected){
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_PROXY,
-                            AudioSystem.DEVICE_STATE_AVAILABLE,
-                            "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_PROXY), "");
-                }else if(state == 0 && isConnected){
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_PROXY,
-                            AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                            "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_PROXY);
-                }
             }
+        }
+    }
+
+    private void masterVolumeChanged(final int flags) {
+        if (mUiContext != null && mVolumePanel != null) {
+            mVolumePanel.postMasterVolumeChanged(flags);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUiContext == null) {
+                        mUiContext = ThemeUtils.createUiContext(mContext);
+                    }
+
+                    final Context context = mUiContext != null ? mUiContext : mContext;
+                    mVolumePanel = new VolumePanel(context, AudioService.this);
+                    mVolumePanel.postMasterVolumeChanged(flags);
+                }
+            });
+        }
+    }
+
+    private void masterMuteChanged(final int flags) {
+        if (mUiContext != null && mVolumePanel != null) {
+            mVolumePanel.postMasterMuteChanged(flags);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUiContext == null) {
+                        mUiContext = ThemeUtils.createUiContext(mContext);
+                    }
+
+                    final Context context = mUiContext != null ? mUiContext : mContext;
+                    mVolumePanel = new VolumePanel(context, AudioService.this);
+                    mVolumePanel.postMasterMuteChanged(flags);
+                }
+            });
+        }
+    }
+
+    private void remoteSliderVisibility(final boolean hasRemotePlayback) {
+        if (mUiContext != null && mVolumePanel != null) {
+            mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUiContext == null) {
+                        mUiContext = ThemeUtils.createUiContext(mContext);
+                    }
+
+                    final Context context = mUiContext != null ? mUiContext : mContext;
+                    mVolumePanel = new VolumePanel(context, AudioService.this);
+                    mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
+                }
+            });
         }
     }
 
@@ -4218,6 +4237,63 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     final Context context = mUiContext != null ? mUiContext : mContext;
                     mVolumePanel = new VolumePanel(context, AudioService.this);
                     mVolumePanel.postVolumeChanged(streamType, flags);
+                }
+            });
+        }
+    }
+
+    private void remoteVolumeChanged(final int streamType, final int flags) {
+        if (mUiContext != null && mVolumePanel != null) {
+            mVolumePanel.postRemoteVolumeChanged(streamType, flags);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUiContext == null) {
+                        mUiContext = ThemeUtils.createUiContext(mContext);
+                    }
+
+                    final Context context = mUiContext != null ? mUiContext : mContext;
+                    mVolumePanel = new VolumePanel(context, AudioService.this);
+                    mVolumePanel.postRemoteVolumeChanged(streamType, flags);
+                }
+            });
+        }
+    }
+
+    private void displaySafeVolumeWarning() {
+        if (mUiContext != null && mVolumePanel != null) {
+            mVolumePanel.postDisplaySafeVolumeWarning(0);
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUiContext == null) {
+                        mUiContext = ThemeUtils.createUiContext(mContext);
+                    }
+
+                    final Context context = mUiContext != null ? mUiContext : mContext;
+                    mVolumePanel = new VolumePanel(context, AudioService.this);
+                    mVolumePanel.postDisplaySafeVolumeWarning(0);
+                }
+            });
+        }
+    }
+
+    private void hasNewRemotePlaybackInfo() {
+        if (mUiContext != null && mVolumePanel != null) {
+            mVolumePanel.postHasNewRemotePlaybackInfo();
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUiContext == null) {
+                        mUiContext = ThemeUtils.createUiContext(mContext);
+                    }
+
+                    final Context context = mUiContext != null ? mUiContext : mContext;
+                    mVolumePanel = new VolumePanel(context, AudioService.this);
+                    mVolumePanel.postHasNewRemotePlaybackInfo();
                 }
             });
         }
@@ -4283,10 +4359,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void notifyTopOfAudioFocusStack() {
         // notify the top of the stack it gained focus
         if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
-            if (canReassignAudioFocus(mFocusStack.peek().mClientId)) {
+            String clientId = mFocusStack.peek().mClientId;
+            if (canReassignAudioFocusTo(clientId)) {
                 try {
                     mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
-                            AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
+                            AudioManager.AUDIOFOCUS_GAIN, clientId);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failure to signal gain of audio control focus due to "+ e);
                     e.printStackTrace();
@@ -4436,98 +4513,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /**
      * Helper function:
-     * Gets the call states from HAL using the AudioSystem.getParameters() function,
-     * parses the return string and updates the local call state variables.
-     * Returns true if the system is in a state where the focus can be granted to
-     * QCHAT call, false otherwise.
+     * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
      */
-    private boolean isQchatCallAllowed()
-    {
-        int voiceCallState = 0;
-        int voice2CallState = 0;
-        int volteCallState = 0;
-        int qchatCallState = 0;
-
-        try {
-            String keyValuePair, value;
-            String[] fields, tokens;
-            long vsid;
-            int callState;
-
-            // AudioSystem.getParameters() returns a value in the format:
-            // "all_call_states=281022464:1,282857472:1,281026560:1,276836352:1"
-            keyValuePair = AudioSystem.getParameters(AudioManager.ALL_CALL_STATES_KEY);
-            if (!keyValuePair.startsWith(AudioManager.ALL_CALL_STATES_KEY)) {
-                return false;
-            }
-
-            value = keyValuePair.substring(AudioManager.ALL_CALL_STATES_KEY.length()+1);
-            fields = value.split(",");
-            for (String item : fields) {
-                tokens = item.split(":");
-                vsid = Long.decode(tokens[0]).longValue();
-                callState = Integer.decode(tokens[1]).intValue();
-
-                if (vsid == AudioManager.VOICE_VSID)
-                    voiceCallState = callState;
-                else if (vsid == AudioManager.VOICE2_VSID)
-                    voice2CallState = callState;
-                else if (vsid == AudioManager.IMS_VSID)
-                    volteCallState = callState;
-                else if (vsid == AudioManager.QCHAT_VSID)
-                    qchatCallState = callState;
-                else
-                    Log.e(TAG, "Unrecognized VSID value "+vsid);
-            }
-
-            Log.i(TAG, "voiceCallState=" + voiceCallState + " voice2CallState=" + voice2CallState);
-            Log.i(TAG, "volteCallState=" + volteCallState + " qchatCallState=" + qchatCallState);
-        } catch (Exception e) {
-            Log.e(TAG, "Could not get call states from HAL due to "+e);
-        }
-
-        if ((voiceCallState == AudioManager.CALL_ACTIVE ) ||
-            (voice2CallState == AudioManager.CALL_ACTIVE ) ||
-            (volteCallState == AudioManager.CALL_ACTIVE ) ||
-            (qchatCallState == AudioManager.CALL_ACTIVE )) {
-            return false;
-        }
-        else {
+    private boolean canReassignAudioFocusTo(String clientId) {
+        // focus requests are rejected during a phone call or when the phone is ringing
+        // this is equivalent to IN_VOICE_COMM_FOCUS_ID having the focus
+        if (IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
             return true;
         }
-    }
-
-    /* Constant to identify focus stack entry that is used to hold the audio focus for QCHAT client
-     */
-    private static final String CLIENT_ID_QCHAT = "QCHAT";
-
-    /**
-     * Helper function:
-     * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
-     */
-    private boolean canReassignAudioFocus(String clientId) {
-        // focus requests are rejected during a phone call or when the phone is ringing
-        // this is equivalent to IN_VOICE_COMM_FOCUS_ID having the focus.
-        // Also focus request is granted to QCHAT client when the CS/IMS calls are on HOLD.
         if (!mFocusStack.isEmpty() && IN_VOICE_COMM_FOCUS_ID.equals(mFocusStack.peek().mClientId)) {
-            if (clientId.contains(CLIENT_ID_QCHAT) && isQchatCallAllowed())
-                return true;
-            else
-                return false;
-        }
-        return true;
-    }
-
-    /**
-     * Helper function:
-     * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
-     */
-    private boolean canReassignAudioFocusFromQchat(int streamType, String clientId) {
-        // Focus request is rejected for Music Player and for QChat client if the focus is already
-        // acquired by a QChat client
-        if (!mFocusStack.isEmpty() &&
-            mFocusStack.peek().mClientId.contains(CLIENT_ID_QCHAT) &&
-            (clientId.contains(CLIENT_ID_QCHAT) || (streamType == AudioManager.STREAM_MUSIC))) {
             return false;
         }
         return true;
@@ -4571,10 +4565,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         synchronized(mAudioFocusLock) {
-            if (!canReassignAudioFocus(clientId)) {
-                return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
-            }
-            if (!canReassignAudioFocusFromQchat(mainStreamType, clientId)) {
+            if (!canReassignAudioFocusTo(clientId)) {
                 return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
             }
 
@@ -4657,82 +4648,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         synchronized(mAudioFocusLock) {
             removeFocusStackEntry(clientId, false);
         }
-    }
-
-    /**
-     * Helper function:
-     * Parses the input Key-Value pairs and handles the audio focus to QCHAT if needed.
-     */
-    private void handleFocusForQchat(String keyValuePairs) {
-        long vsid = 0;
-        int callState = 0;
-        // Parse VSID and Call State from the input string
-        try {
-            String[] pairs;
-            String[] fields;
-
-            pairs = keyValuePairs.split(";");
-            for (String item : pairs) {
-                Log.d(TAG, "keyValuePair is "+item);
-                fields = item.split("=");
-                if (item.startsWith(AudioManager.VSID_KEY)) {
-                    vsid = Long.decode(fields[1]).longValue();
-                }
-                else if (item.startsWith(AudioManager.CALL_STATE_KEY)) {
-                    callState = Integer.decode(fields[1]).intValue();
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Invalid number format "+e);
-            return;
-        }
-
-        // Check if any of the telephony calls are UN-HOLD so that
-        // QCHAT call should lose focus automatically
-        if (((vsid == AudioManager.VOICE_VSID) ||
-             (vsid == AudioManager.VOICE2_VSID) ||
-             (vsid == AudioManager.IMS_VSID)) &&
-             (callState == AudioManager.CALL_ACTIVE)) {
-
-            Log.d(TAG, "Telephony call is going to ACTIVE state, see if QCHAT needs to be closed ");
-            // Notify the QCHAT client that it is losing focus if it is the
-            // current top of the stack; Also remove the focus stack entry for QCHAT.
-            synchronized(mAudioFocusLock) {
-                if ((!mFocusStack.isEmpty()) &&
-                     (mFocusStack.peek().mClientId.contains(CLIENT_ID_QCHAT)) &&
-                     (mFocusStack.peek().mFocusDispatcher != null)) {
-                    try {
-                        Log.d(TAG, "Dispatch focus loss to QCHAT ");
-                        mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
-                                -1 * mFocusStack.peek().mFocusChangeType, /* loss and gain codes
-                                                                    are inverse of each other */
-                                mFocusStack.peek().mClientId);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, " Failure to signal loss of focus due to "+ e);
-                        e.printStackTrace();
-                    }
-
-                    FocusStackEntry fse = mFocusStack.pop();
-                    fse.unlinkToDeath();
-                }
-            }
-        }
-    }
-
-    /**
-     * Sets a variable number of parameter values to audio hardware.
-     *
-     * @param keyValuePairs list of parameters key value pairs in the form:
-     *    key1=value1;key2=value2;...
-     *
-     */
-    public void setParameters(String keyValuePairs) {
-
-        if (keyValuePairs.contains(AudioManager.VSID_KEY)) {
-            handleFocusForQchat(keyValuePairs);
-        }
-
-        AudioSystem.setParameters(keyValuePairs);
     }
 
 
@@ -6464,7 +6379,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         // fire up the UI
-        mVolumePanel.postRemoteVolumeChanged(streamType, flags);
+        remoteVolumeChanged(streamType, flags);
     }
 
     private void sendVolumeUpdateToRemote(int rccId, int direction) {
@@ -6584,7 +6499,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         synchronized (mMainRemote) {
             if (mHasRemotePlayback != hasRemotePlayback) {
                 mHasRemotePlayback = hasRemotePlayback;
-                mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
+                remoteSliderVisibility(hasRemotePlayback);
             }
         }
     }
@@ -6773,8 +6688,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
     private final int mSafeMediaVolumeDevices = AudioSystem.DEVICE_OUT_WIRED_HEADSET |
                                                 AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
-    // mManualSafeMediaVolume overrides the built-in safe media volume
-    boolean mManualSafeMediaVolume;
     // mMusicActiveMs is the cumulative time of music activity since safe volume was disabled.
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
     // automatically. mMusicActiveMs is rounded to a multiple of MUSIC_ACTIVE_POLL_PERIOD_MS.
@@ -6806,9 +6719,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     private void enforceSafeMediaVolume() {
-        // return if safe volume has been manually turned off
-        if (!mManualSafeMediaVolume) return;
-
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
         int devices = mSafeMediaVolumeDevices;
         int i = 0;
@@ -6838,7 +6748,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             if ((mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) &&
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
-                    (index > mSafeMediaVolumeIndex) && mManualSafeMediaVolume) {
+                    (index > mSafeMediaVolumeIndex)) {
+                displaySafeVolumeWarning();
                 return false;
             }
             return true;
@@ -6904,11 +6815,5 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
         pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);
-    }
-
-    protected void updateManualSafeMediaVolume() {
-        mManualSafeMediaVolume = Settings.System.getBoolean(mContext.getContentResolver(),
-                Settings.System.MANUAL_SAFE_MEDIA_VOLUME, true);
-        setSafeMediaVolumeEnabled(mManualSafeMediaVolume);
     }
 }

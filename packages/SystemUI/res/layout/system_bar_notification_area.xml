@@ -18,6 +18,7 @@
 <!-- notification icons & panel access -->
 <com.android.systemui.statusbar.tablet.NotificationArea
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notificationArea"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
@@ -31,7 +32,6 @@
         android:id="@+id/feedbackIconArea"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
         >
 
@@ -59,14 +59,13 @@
             android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
             >
             <view
                 class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
                 android:id="@+id/icons"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_gravity="center_vertical"
                 android:layout_marginStart="8dp"
                 android:alpha="0.4"
                 />
@@ -88,16 +87,6 @@
             android:paddingStart="6dip"
             android:layout_marginEnd="8dip"
             android:gravity="center_vertical|start"
-            />
-        <com.android.systemui.statusbar.policy.ClockCenter
-            android:id="@+id/clock"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:singleLine="true"
-            android:paddingLeft="6dip"
-            android:layout_marginRight="8dip"
-            android:gravity="center_vertical|left"
             />
 
         <TextView
@@ -125,13 +114,6 @@
                 android:id="@+id/signal_cluster"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android.visibility="gone"
-                />
-            <include layout="@layout/signal_cluster_view_alt"
-                android:id="@+id/signal_cluster_alt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android.visibility="gone"
                 />
             <ImageView
                 android:id="@+id/bluetooth"
@@ -140,11 +122,12 @@
                 android:paddingStart="4dip"
                 android:visibility="gone"
                 />
-            <include layout="@layout/battery_cluster_view"
-                android:id="@+id/battery_cluster"
-                android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/battery"
                 android:layout_height="wrap_content"
-            />
+                android:layout_width="wrap_content"
+                android:paddingStart="4dip"
+                />
         </LinearLayout>
     </LinearLayout>
 </com.android.systemui.statusbar.tablet.NotificationArea>

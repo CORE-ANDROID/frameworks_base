@@ -1,9 +1,6 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
  *
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +20,8 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
+import android.app.Profile;
+import android.app.ProfileManager;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetHost;
@@ -47,7 +46,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.telephony.MSimTelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -56,14 +54,12 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.RemoteViews.OnClickHandler;
 
-
-import com.android.internal.R;
 import com.android.internal.app.ThemeUtils;
+import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.internal.policy.impl.keyguard.KeyguardUpdateMonitor.DisplayClientState;
 import com.android.internal.widget.LockPatternUtils;
@@ -93,7 +89,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
     private KeyguardWidgetPager mAppWidgetContainer;
-    private KeyguardWidgetPager mAppWidgetContainerHidden;
     private KeyguardSecurityViewFlipper mSecurityViewContainer;
     private KeyguardSelectorView mKeyguardSelectorView;
     private KeyguardTransportControlView mTransportControl;
@@ -132,6 +127,15 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     protected int mClientGeneration;
 
+     // We can use the profile manager to override security
+     private ProfileManager mProfileManager;
+
+     /*package*/ interface TransportCallback {
+        void onListenerDetached();
+        void onListenerAttached();
+        void onPlayStateChanged();
+    }
+
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
         void showSecurityView();
@@ -160,6 +164,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         // Once created, keyguard should *never* re-use this instance with another user.
         // In other words, mUserId should never change - hence it's marked final.
         mUserId = mLockPatternUtils.getCurrentUser();
+
+        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
 
         DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -369,17 +375,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
         View deleteDropTarget = findViewById(R.id.keyguard_widget_pager_delete_target);
-        if (Settings.System.getBoolean(getContext().getContentResolver(),
-                Settings.System.LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL, false)) {
-            mAppWidgetContainerHidden = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
-            mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container_carousel);
-        }
-        else {
-            mAppWidgetContainerHidden = (KeyguardWidgetPager) findViewById(R.id.app_widget_container_carousel);
-            mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
-        }
+        mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         mAppWidgetContainer.setVisibility(VISIBLE);
-        removeView(mAppWidgetContainerHidden);
         mAppWidgetContainer.setCallbacks(mWidgetCallbacks);
         mAppWidgetContainer.setDeleteDropTarget(deleteDropTarget);
         mAppWidgetContainer.setMinScale(0.5f);
@@ -406,11 +403,16 @@ public class KeyguardHostView extends KeyguardViewBase {
         addDefaultWidgets();
 
         addWidgetsFromSettings();
-
+        mUnlimitedWidgets = Settings.System.getBoolean(getContext().getContentResolver(),
+                                  Settings.System.LOCKSCREEN_UNLIMITED_WIDGETS, false);
+        if (mUnlimitedWidgets) {
+            MAX_WIDGETS = numWidgets() + 1;
+        } else {
+            MAX_WIDGETS = 5;
+        }
         if (!shouldEnableAddWidget()) {
             mAppWidgetContainer.setAddWidgetEnabled(false);
         }
-
         checkAppWidgetConsistency();
         mSwitchPageRunnable.run();
         // This needs to be called after the pages are all added.
@@ -435,13 +437,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private boolean shouldEnableAddWidget() {
-        mUnlimitedWidgets = Settings.System.getBoolean(getContext().getContentResolver(),
-                                  Settings.System.LOCKSCREEN_UNLIMITED_WIDGETS, false);
-        if (mUnlimitedWidgets) {
-            MAX_WIDGETS = numWidgets() + 1;
-        } else {
-            MAX_WIDGETS = 5;
-        }
         return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
     }
 
@@ -536,6 +531,13 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         @Override
         public void onAddView(View v) {
+        mUnlimitedWidgets = Settings.System.getBoolean(getContext().getContentResolver(),
+                                  Settings.System.LOCKSCREEN_UNLIMITED_WIDGETS, false);
+            if (mUnlimitedWidgets) {
+                MAX_WIDGETS = numWidgets() + 1;
+            } else {
+                MAX_WIDGETS = 5;
+            }
             if (!shouldEnableAddWidget()) {
                 mAppWidgetContainer.setAddWidgetEnabled(false);
             }
@@ -543,6 +545,13 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         @Override
         public void onRemoveView(View v, boolean deletePermanently) {
+        mUnlimitedWidgets = Settings.System.getBoolean(getContext().getContentResolver(),
+                                  Settings.System.LOCKSCREEN_UNLIMITED_WIDGETS, false);
+            if (mUnlimitedWidgets) {
+                MAX_WIDGETS = numWidgets() + 1;
+            } else {
+                MAX_WIDGETS = 5;
+            }
             if (deletePermanently) {
                 final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
                 if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
@@ -959,12 +968,6 @@ public class KeyguardHostView extends KeyguardViewBase {
             final LayoutInflater inflater = LayoutInflater.from(ThemeUtils.createUiContext(mContext));
             if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
             View v = inflater.inflate(layoutId, mSecurityViewContainer, false);
-            if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
-                ViewStub vStub = (ViewStub) (v.findViewById(R.id.stub_msim_carrier_text));
-                if (vStub != null) {
-                    vStub.inflate();
-                }
-            }
             mSecurityViewContainer.addView(v);
             updateSecurityView(v);
             view = (KeyguardSecurityView)v;
@@ -1105,10 +1108,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         SecurityMode mode = mSecurityModel.getSecurityMode();
         switch (mode) {
             case Pattern:
-                return mLockPatternUtils.isLockPatternEnabled();
+                return mLockPatternUtils.isLockPatternEnabled()
+                        && mProfileManager.getActiveProfile().getScreenLockMode()!= Profile.LockMode.INSECURE;
             case Password:
             case PIN:
-                return mLockPatternUtils.isLockPasswordEnabled();
+                return mLockPatternUtils.isLockPasswordEnabled()
+                        && mProfileManager.getActiveProfile().getScreenLockMode() != Profile.LockMode.INSECURE;
             case SimPin:
             case SimPuk:
             case Account:
@@ -1163,16 +1168,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             case Password: return R.id.keyguard_password_view;
             case Biometric: return R.id.keyguard_face_unlock_view;
             case Account: return R.id.keyguard_account_view;
-            case SimPin:
-                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
-                    return R.id.msim_keyguard_sim_pin_view;
-                }
-                return R.id.keyguard_sim_pin_view;
-            case SimPuk:
-                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
-                    return R.id.msim_keyguard_sim_puk_view;
-                }
-                return R.id.keyguard_sim_puk_view;
+            case SimPin: return R.id.keyguard_sim_pin_view;
+            case SimPuk: return R.id.keyguard_sim_puk_view;
         }
         return 0;
     }
@@ -1185,16 +1182,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             case Password: return R.layout.keyguard_password_view;
             case Biometric: return R.layout.keyguard_face_unlock_view;
             case Account: return R.layout.keyguard_account_view;
-            case SimPin:
-                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
-                    return R.layout.msim_keyguard_sim_pin_view;
-                }
-                return R.layout.keyguard_sim_pin_view;
-            case SimPuk:
-                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
-                    return R.layout.msim_keyguard_sim_puk_view;
-                }
-                return R.layout.keyguard_sim_puk_view;
+            case SimPin: return R.layout.keyguard_sim_pin_view;
+            case SimPuk: return R.layout.keyguard_sim_puk_view;
             default:
                 return 0;
         }

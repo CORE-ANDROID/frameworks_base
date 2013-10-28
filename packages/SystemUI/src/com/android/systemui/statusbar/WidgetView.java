@@ -48,8 +48,8 @@ public class WidgetView extends LinearLayout {
     long mDowntime;
     boolean mMoving = false;
     boolean showing = false;
-    boolean animating = false;
     int mCurrUiInvertedMode;
+    boolean animating = false;
 
     final static String TAG = "Widget";
 
@@ -92,7 +92,7 @@ public class WidgetView extends LinearLayout {
             params.gravity = Gravity.BOTTOM;
             params.setTitle("Widgets");
             if (mWindowManager != null && mAdapter !=null){
-                showing = true;
+            	showing = true;
                 mWindowManager.addView(mPopupView, params);
                 mAdapter.onShow();
                 PlayInAnim();
@@ -101,7 +101,7 @@ public class WidgetView extends LinearLayout {
             }
         }
     }
-
+    
     private Runnable removePopup = new Runnable() {
         public void run() {
             mAdapter.onHide();

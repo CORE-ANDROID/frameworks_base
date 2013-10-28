@@ -41,7 +41,6 @@ public class GestureCatcherView extends LinearLayout{
     private int mScreenWidth, mScreenHeight;
 
     private BaseStatusBar mBar;
-    private SettingsObserver mSettingsObserver;
 
     final static String TAG = "PopUpNav";
 
@@ -60,7 +59,8 @@ public class GestureCatcherView extends LinearLayout{
         mScreenHeight = size.x;
         mScreenWidth = size.y;
 
-        mSettingsObserver = new SettingsObserver(new Handler());
+        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
+        settingsObserver.observe();
         updateSettings();
 
         mDragButton.setOnTouchListener(new View.OnTouchListener() {
@@ -113,20 +113,6 @@ public class GestureCatcherView extends LinearLayout{
                 return true;
                 }
             });
-    }
-
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mSettingsObserver.observe();
-        updateSettings();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
-        super.onDetachedFromWindow();
     }
 
     public void setSwapXY(boolean swap) {

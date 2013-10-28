@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Kang Project
+ * Copyright (C) 2013 The Android Open Kand Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
-import com.android.systemui.settings.BrightnessController;
-import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BrightnessController;
+import com.android.systemui.statusbar.policy.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -272,6 +272,11 @@ public class AokpSwipeRibbon extends LinearLayout {
         mPopupView.removeAllViews();
         mContainerFrame = new FrameLayout(mContext);
         mContainerFrame.removeAllViews();
+        if (mNavBarShowing) {
+            int adjustment = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.status_bar_height);
+            mPopupView.setPadding(0, adjustment, 0, 0);
+        }
         mBackGround = new Button(mContext);
         mBackGround.setClickable(false);
         mBackGround.setBackgroundColor(mColor);
@@ -441,18 +446,15 @@ public class AokpSwipeRibbon extends LinearLayout {
             if (deviceSupportsBluetooth()) {
                 toggleMap.put(BLUETOOTH_TOGGLE, BluetoothToggle.class);
             }
-            toggleMap.put(SWAGGER_TOGGLE, SwaggerToggle.class);
             if (((Vibrator)mContext.getSystemService(Context.VIBRATOR_SERVICE)).hasVibrator()) {
                 toggleMap.put(VIBRATE_TOGGLE, VibrateToggle.class);
                 toggleMap.put(SOUND_STATE_TOGGLE, SoundStateToggle.class);
             }
             toggleMap.put(SILENT_TOGGLE, SilentToggle.class);
-            toggleMap.put(FCHARGE_TOGGLE, FastChargeToggle.class);
             toggleMap.put(SYNC_TOGGLE, SyncToggle.class);
             if (mContext.getSystemService(Context.NFC_SERVICE) != null) {
                 toggleMap.put(NFC_TOGGLE, NfcToggle.class);
             }
-            toggleMap.put(TORCH_TOGGLE, TorchToggle.class);
             toggleMap.put(USB_TETHER_TOGGLE, UsbTetherToggle.class);
             if (((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
                     .getPhoneType() == PhoneConstants.PHONE_TYPE_GSM) {
@@ -462,15 +464,10 @@ public class AokpSwipeRibbon extends LinearLayout {
                     || TelephonyManager.getLteOnGsmModeStatic() != 0) {
                 toggleMap.put(LTE_TOGGLE, LteToggle.class);
             }
-            toggleMap.put(FAV_CONTACT_TOGGLE, FavoriteUserToggle.class);
-            toggleMap.put(NAVBAR_HIDE_TOGGLE, NavbarHideToggle.class);
             toggleMap.put(QUICKRECORD_TOGGLE, QuickRecordToggle.class);
-            toggleMap.put(QUIETHOURS_TOGGLE, QuietHoursToggle.class);
             toggleMap.put(SLEEP_TOGGLE, SleepToggle.class);
             toggleMap.put(STATUSBAR_TOGGLE, StatusbarToggle.class);
-            toggleMap.put(SCREENSHOT_TOGGLE, ScreenshotToggle.class);
             toggleMap.put(REBOOT_TOGGLE, RebootToggle.class);
-            toggleMap.put(CUSTOM_TOGGLE, CustomToggle.class);
             toggleMap.put(STAYAWAKE_TOGGLE, StayAwakeToggle.class);
             toggleMap.put(WIRELESS_ADB_TOGGLE, WirelessAdbToggle.class);
             // toggleMap.put(BT_TETHER_TOGGLE, null);

@@ -799,8 +799,7 @@ class WifiConfigStore {
                 if (out != null) {
                     try {
                         out.close();
-                    } catch (Exception e) {
-                    }
+                    } catch (Exception e) {}
                 }
 
                 //Quit if no more writes sent
@@ -944,8 +943,7 @@ class WifiConfigStore {
             if (in != null) {
                 try {
                     in.close();
-                } catch (Exception e) {
-                }
+                } catch (Exception e) {}
             }
         }
     }
@@ -994,7 +992,6 @@ class WifiConfigStore {
                 loge("failed to set BSSID: "+config.BSSID);
                 break setVariables;
             }
-
             if (config.isIBSS) {
                 if(!mWifiNative.setNetworkVariable(
                         netId,
@@ -1011,6 +1008,7 @@ class WifiConfigStore {
                     break setVariables;
                 }
             }
+
 
             String allowedKeyManagementString =
                 makeString(config.allowedKeyManagement, WifiConfiguration.KeyMgmt.strings);

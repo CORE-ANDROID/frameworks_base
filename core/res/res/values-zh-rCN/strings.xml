@@ -163,9 +163,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飞行模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"已关闭飞行模式"</string>
-    <string name="global_action_screenshot">屏幕截图</string>
-    <string name="global_action_torch">灯光</string>
-    <string name="global_actions_toggle_navbar_hide">导航栏和状态栏控制</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
@@ -230,10 +227,6 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"访问 USB 存储设备。"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问 SD 卡。"</string>
-
-    <string name="permlab_accessSuperuser">设备所有功能和存储的完整权限</string>
-    <string name="permdesc_accessSuperuser">超级用户拥有设备所有功能和存储的完整控制权限，包括设备的安全性、硬件传感器等。此权限存在潜在危险性。</string>
-
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"辅助功能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"辅助技术可请求启用的功能。"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
@@ -399,8 +392,6 @@
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"允许该应用删除其他应用的缓存目录中的文件，从而释放手机存储空间。此权限可能会导致其他应用的启动速度变慢，因为应用必须重新检索数据。"</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"移动应用资源"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"允许应用在内部与外部媒体之间移动应用资源。"</string>
-    <string name="permlab_preventpower">重定义电源键</string>
-    <string name="permdesc_preventpower">允许应用程序覆盖电源键的行为定义</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"查阅敏感日志数据"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"允许应用从系统的各种日志文件中读取信息。这样，应用就可以发现关于您平板电脑使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允许应用从系统的各个日志文件中读取信息。这样，应用就可以发现关于您手机使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
@@ -505,10 +496,6 @@
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"允许应用重命名内存设备。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"允许应用控制振动器。"</string>
-    <string name="permlab_fm_radio_receiver">控制FM广播</string>
-    <string name="permdesc_fm_radio_receiver">允许应用控制FM广播。</string>
-    <string name="permlab_fm_radio_transmitter">控制FM发射器</string>
-    <string name="permdesc_fm_radio_transmitter">允许应用控制FM发射器。</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制闪光灯"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"允许应用控制闪光灯。"</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"管理 USB 设备的偏好设置和权限"</string>
@@ -638,10 +625,6 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允许应用管理网络政策和定义专门针对应用的规则。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改网络使用情况记录方式"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允许该应用修改对于各应用的网络使用情况的统计方式。普通应用不应使用此权限。"</string>
-
-    <string name="permlab_revokePermissions">允许察看和编辑撤销权限，非正常的使用应用程序。</string>
-    <string name="permdesc_revokePermissions">允许读取和写入撤销权限，非正常的使用应用程序。</string>
-
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"访问通知"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"允许该应用检索、检查并清除通知，包括其他应用发布的通知。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"绑定到通知侦听器服务"</string>
@@ -807,8 +790,6 @@
     <string name="lockscreen_charged" msgid="321635745684060624">"充电完成"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"连接您的充电器。"</string>
-    <string name="lockscreen_always_battery">当前电量： <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <string name="lockscreen_always_low_battery">连接您的充电器： <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"没有 SIM 卡"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"手机中无 SIM 卡"</string>
@@ -1098,10 +1079,6 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"很抱歉，“<xliff:g id="APPLICATION">%1$s</xliff:g>”已停止运行。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"抱歉，进程“<xliff:g id="PROCESS">%1$s</xliff:g>”已停止运行。"</string>
-    <string name="aerr_revoked_application">应用程序 <xliff:g id="application">%1$s</xliff:g>
-        （进程 <xliff:g id="process">%2$s</xliff:g>）已停止运行。\n警告！\n该应用程序有一个或多个权限被撤销，可能导致故障发生。请同意这些权限再重试。</string>
-    <string name="aerr_revoked_process">进程 <xliff:g id="process">%1$s</xliff:g> 已
-        停止运行。\n警告！\n该进程有一个或多个权限被撤销，可能导致故障发生。请同意这些权限再重试。</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 无响应。"\n\n"要将其关闭吗？"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 活动无响应。"\n\n"要将其关闭吗？"</string>
@@ -1110,7 +1087,6 @@
     <string name="force_close" msgid="8346072094521265605">"确定"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
-    <string name="reset_perms">重置权限</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"该网页已无响应。"\n\n"要将其关闭吗？"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"应用已重定向"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前正在运行。"</string>
@@ -1449,7 +1425,6 @@
     <string name="sending" msgid="3245653681008218030">"正在发送..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"要启动浏览器吗？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"要接听电话吗？"</string>
-    <string name="app_killed_message">应用程序已结束</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"始终"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"仅此一次"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"平板电脑"</string>
@@ -1461,11 +1436,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"蓝牙音频"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"无线显示"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完成"</string>
-    <string name="reboot">重新启动</string>
-    <string name="reboot_recovery">恢复模式</string>
-    <string name="reboot_download">刷机模式</string>
-    <string name="reboot_bootloader">引导模式</string>
-    <string name="reboot_progress">您的设备正在重新启动...</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"媒体输出线路"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"正在扫描..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在连接..."</string>
@@ -1526,63 +1496,4 @@
     <string name="app_no_restricted_accounts" msgid="4011285085817350390">"此应用不支持受限个人资料的帐户"</string>
     <string name="app_not_found" msgid="3429141853498927379">"找不到可处理此操作的应用"</string>
     <string name="revoke" msgid="5404479185228271586">"撤消"</string>
-
-    <string name="vibration_picker_title">选择振动效果</string>
-    <string name="vibration_picker_del_title">删除振动效果</string>
-    <string name="notify_turn_wifi_off_title">关闭 Wi-Fi</string>
-    <string name="notify_turn_wifi_ap_off_title">关闭 Wi-Fi 共享网络</string>
-    <string name="toast_rotation_unlocked">屏幕方向自动旋转</string>
-    <string name="toast_rotation_locked">屏幕方向已锁定</string>
-
-    <!-- Animation Strings -->
-    <string name="animation_fade">淡入淡出</string>
-    <string name="animation_slide_right">右侧滑动</string>
-    <string name="animation_slide_left">左侧滑动</string>
-    <string name="animation_slide_right_no_fade">右侧滑动（无淡入淡出）</string>
-    <string name="animation_slide_left_no_fade">左侧滑动（无淡入淡出）</string>
-    <string name="animation_slide_up">底部滑动</string>
-    <string name="animation_slide_down">顶部滑动</string>
-    <string name="animation_default">默认</string>
-    <string name="animation_translucent">透明</string>
-    <string name="animation_grow_shrink">缩放（顶部）</string>
-    <string name="animation_grow_shrink_center">缩放（中间）</string>
-    <string name="animation_grow_shrink_bottom">缩放（底部）</string>
-    <string name="animation_grow_shrink_left">缩放（左侧）</string>
-    <string name="animation_grow_shrink_right">缩放（右侧）</string>
-
-
-    <!-- Awesome Action Stuff-->
-    <string name="action_home">主屏幕</string>
-    <string name="action_back">返回</string>
-    <string name="action_recents">近期任务</string>
-    <string name="action_recents_gb">近期任务（姜饼风格）</string>
-    <string name="action_search">搜索</string>
-    <string name="action_screenshot">屏幕截图</string>
-    <string name="action_menu">菜单</string>
-    <string name="action_ime">输入法选择器</string>
-    <string name="action_kill">结束程序</string>
-    <string name="action_lastapp">上次运行程序</string>
-    <string name="action_power">电源</string>
-    <string name="action_notifications">通知栏</string>
-    <string name="action_assist">搜索（Google Now）</string>
-    <string name="action_clockoptions">时间和日期设置</string>
-    <string name="action_voiceassist">语音搜索</string>
-    <string name="action_torch">灯光</string>
-    <string name="action_silent">铃声/静音</string>
-    <string name="action_vib">铃声/振动</string>
-    <string name="action_silent_vib">铃声/振动/静音</string>
-    <string name="action_event">新建日程活动</string>
-    <string name="action_today">今天日程活动</string>
-    <string name="action_alarm">闹钟</string>
-    <string name="action_unlock">解锁</string>
-    <string name="action_camera">相机</string>
-    <string name="action_null">空</string>
-    <string name="action_widgets">导航栏小部件</string>
-    <string name="action_app_window">应用窗口</string>
-    <string name="action_ribbon">AOKP操作区</string>
-    <string name="action_app">自定义程序/快捷方式</string>
-
-    <string name="permlab_interceptSmsSent">拦截外发短信</string>
-    <string name="permdesc_interceptSmsSent">允许应用程序拦截外发的短信。恶意程序可能会利用它阻止发出短信。</string>
-
 </resources>

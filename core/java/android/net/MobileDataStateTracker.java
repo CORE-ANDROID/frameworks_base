@@ -1,8 +1,5 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (c) 2012-2013 The Linux Foundation. All rights reserved.
- *
- * Not a Contribution.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +28,12 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telephony.MSimTelephonyManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.telephony.DctConstants;
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.msim.ITelephonyMSim;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
@@ -57,12 +52,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MobileDataStateTracker implements NetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
     private PhoneConstants.DataState mMobileDataState;
     private ITelephony mPhoneService;
-    private ITelephonyMSim mMSimPhoneService;
 
     private String mApnType;
     private NetworkInfo mNetworkInfo;
@@ -110,7 +104,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN);
         filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
 
         mContext.registerReceiver(new MobileDataStateReceiver(), filter);
@@ -178,54 +171,19 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     public void releaseWakeLock() {
     }
 
-    private void updateLinkProperitesAndCapatilities(Intent intent) {
-        mLinkProperties = intent.getParcelableExtra(
-                PhoneConstants.DATA_LINK_PROPERTIES_KEY);
-        if (mLinkProperties == null) {
-            loge("CONNECTED event did not supply link properties.");
-            mLinkProperties = new LinkProperties();
-        }
-        mLinkCapabilities = intent.getParcelableExtra(
-                PhoneConstants.DATA_LINK_CAPABILITIES_KEY);
-        if (mLinkCapabilities == null) {
-            loge("CONNECTED event did not supply link capabilities.");
-            mLinkCapabilities = new LinkCapabilities();
-        }
-    }
-
     private class MobileDataStateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(TelephonyIntents.
-                    ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN)) {
-                String apnName = intent.getStringExtra(PhoneConstants.DATA_APN_KEY);
-                String apnType = intent.getStringExtra(PhoneConstants.DATA_APN_TYPE_KEY);
-                if (!TextUtils.equals(mApnType, apnType)) {
-                    return;
-                }
-                if (DBG) {
-                    log("Broadcast received: " + intent.getAction() + " apnType=" + apnType
-                            + " apnName=" + apnName);
-                }
-
-                // Make us in the connecting state until we make a new TYPE_MOBILE_PROVISIONING
-                mMobileDataState = PhoneConstants.DataState.CONNECTING;
-                updateLinkProperitesAndCapatilities(intent);
-                mNetworkInfo.setIsConnectedToProvisioningNetwork(true);
-
-                // Change state to SUSPENDED so setDetailedState
-                // sends EVENT_STATE_CHANGED to connectivityService
-                setDetailedState(DetailedState.SUSPENDED, "", apnName);
-            } else if (intent.getAction().equals(TelephonyIntents.
                     ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
                 String apnType = intent.getStringExtra(PhoneConstants.DATA_APN_TYPE_KEY);
+                if (VDBG) {
+                    log(String.format("Broadcast received: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED"
+                        + "mApnType=%s %s received apnType=%s", mApnType,
+                        TextUtils.equals(apnType, mApnType) ? "==" : "!=", apnType));
+                }
                 if (!TextUtils.equals(apnType, mApnType)) {
                     return;
-                }
-                // Assume this isn't a provisioning network.
-                mNetworkInfo.setIsConnectedToProvisioningNetwork(false);
-                if (DBG) {
-                    log("Broadcast received: " + intent.getAction() + " apnType=" + apnType);
                 }
 
                 int oldSubtype = mNetworkInfo.getSubtype();
@@ -244,7 +202,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 String apnName = intent.getStringExtra(PhoneConstants.DATA_APN_KEY);
                 mNetworkInfo.setRoaming(intent.getBooleanExtra(
                         PhoneConstants.DATA_NETWORK_ROAMING_KEY, false));
-                if (DBG) {
+                if (VDBG) {
                     log(mApnType + " setting isAvailable to " +
                             intent.getBooleanExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY,false));
                 }
@@ -278,7 +236,18 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             setDetailedState(DetailedState.SUSPENDED, reason, apnName);
                             break;
                         case CONNECTED:
-                            updateLinkProperitesAndCapatilities(intent);
+                            mLinkProperties = intent.getParcelableExtra(
+                                    PhoneConstants.DATA_LINK_PROPERTIES_KEY);
+                            if (mLinkProperties == null) {
+                                loge("CONNECTED event did not supply link properties.");
+                                mLinkProperties = new LinkProperties();
+                            }
+                            mLinkCapabilities = intent.getParcelableExtra(
+                                    PhoneConstants.DATA_LINK_CAPABILITIES_KEY);
+                            if (mLinkCapabilities == null) {
+                                loge("CONNECTED event did not supply link capabilities.");
+                                mLinkCapabilities = new LinkCapabilities();
+                            }
                             setDetailedState(DetailedState.CONNECTED, reason, apnName);
                             break;
                     }
@@ -303,15 +272,18 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                     equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
                 String apnType = intent.getStringExtra(PhoneConstants.DATA_APN_TYPE_KEY);
                 if (!TextUtils.equals(apnType, mApnType)) {
+                    if (DBG) {
+                        log(String.format(
+                                "Broadcast received: ACTION_ANY_DATA_CONNECTION_FAILED ignore, " +
+                                "mApnType=%s != received apnType=%s", mApnType, apnType));
+                    }
                     return;
                 }
-                // Assume this isn't a provisioning network.
-                mNetworkInfo.setIsConnectedToProvisioningNetwork(false);
                 String reason = intent.getStringExtra(PhoneConstants.FAILURE_REASON_KEY);
                 String apnName = intent.getStringExtra(PhoneConstants.DATA_APN_KEY);
                 if (DBG) {
-                    log("Broadcast received: " + intent.getAction() +
-                                " reason=" + reason == null ? "null" : reason);
+                    log("Received " + intent.getAction() +
+                                " broadcast" + reason == null ? "" : "(" + reason + ")");
                 }
                 setDetailedState(DetailedState.FAILED, reason, apnName);
             } else {
@@ -321,13 +293,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     }
 
     private void getPhoneService(boolean forceRefresh) {
-        if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
-            if (mMSimPhoneService == null || forceRefresh) {
-                mMSimPhoneService = ITelephonyMSim.Stub.asInterface(
-                        ServiceManager.getService("phone_msim"));
-            }
-            return;
-        }
         if ((mPhoneService == null) || forceRefresh) {
             mPhoneService = ITelephony.Stub.asInterface(ServiceManager.getService("phone"));
         }
@@ -356,7 +321,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             networkTypeStr = "edge";
             break;
         case TelephonyManager.NETWORK_TYPE_UMTS:
-        case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
             networkTypeStr = "umts";
             break;
         case TelephonyManager.NETWORK_TYPE_HSDPA:
@@ -412,13 +376,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     public boolean teardown() {
         setTeardownRequested(true);
         return (setEnableApn(mApnType, false) != PhoneConstants.APN_REQUEST_FAILED);
-    }
-
-    /**
-     * @return true if this is ready to operate
-     */
-    public boolean isReady() {
-        return mDataConnectionTrackerAc != null;
     }
 
     @Override
@@ -512,33 +469,15 @@ public class MobileDataStateTracker implements NetworkStateTracker {
          * RemoteException and need to re-reference the service.
          */
         for (int retry = 0; retry < 2; retry++) {
-            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
-                if (mMSimPhoneService == null) {
-                    loge("Ignoring mobile radio request because "
-                            + "could not acquire MSim Phone Service");
-                    break;
-                }
+            if (mPhoneService == null) {
+                loge("Ignoring mobile radio request because could not acquire PhoneService");
+                break;
+            }
 
-                try {
-                    boolean result = true;
-                    for (int i = 0; i < MSimTelephonyManager.getDefault().getPhoneCount(); i++) {
-                        result = result && mMSimPhoneService.setRadio(turnOn, i);
-                    }
-                    return result;
-                } catch (RemoteException e) {
-                    if (retry == 0) getPhoneService(true);
-                }
-            } else {
-                if (mPhoneService == null) {
-                    loge("Ignoring mobile radio request because could not acquire PhoneService");
-                    break;
-                }
-
-                try {
-                    return mPhoneService.setRadio(turnOn);
-                } catch (RemoteException e) {
-                    if (retry == 0) getPhoneService(true);
-                }
+            try {
+                return mPhoneService.setRadio(turnOn);
+            } catch (RemoteException e) {
+                if (retry == 0) getPhoneService(true);
             }
         }
 
@@ -601,40 +540,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         }
     }
 
-    /**
-     *  Inform DCT mobile provisioning has started, it ends when provisioning completes.
-     */
-    public void enableMobileProvisioning(String url) {
-        if (DBG) log("enableMobileProvisioning(url=" + url + ")");
-        final AsyncChannel channel = mDataConnectionTrackerAc;
-        if (channel != null) {
-            Message msg = Message.obtain();
-            msg.what = DctConstants.CMD_ENABLE_MOBILE_PROVISIONING;
-            msg.setData(Bundle.forPair(DctConstants.PROVISIONING_URL_KEY, url));
-            channel.sendMessage(msg);
-        }
-    }
-
-    /**
-     * Return if this network is the provisioning network. Valid only if connected.
-     * @param met
-     */
-    public boolean isProvisioningNetwork() {
-        boolean retVal;
-        try {
-            Message msg = Message.obtain();
-            msg.what = DctConstants.CMD_IS_PROVISIONING_APN;
-            msg.setData(Bundle.forPair(DctConstants.APN_TYPE_KEY, mApnType));
-            Message result = mDataConnectionTrackerAc.sendMessageSynchronously(msg);
-            retVal = result.arg1 == DctConstants.ENABLED;
-        } catch (NullPointerException e) {
-            loge("isProvisioningNetwork: X " + e);
-            retVal = false;
-        }
-        if (DBG) log("isProvisioningNetwork: retVal=" + retVal);
-        return retVal;
-    }
-
     @Override
     public void addStackedLink(LinkProperties link) {
         mLinkProperties.addStackedLink(link);
@@ -669,36 +574,19 @@ public class MobileDataStateTracker implements NetworkStateTracker {
          * RemoteException and need to re-reference the service.
          */
         for (int retry = 0; retry < 2; retry++) {
-            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
-                if (mMSimPhoneService == null) {
-                    loge("Ignoring feature request because could not acquire MSim Phone Service");
-                    break;
-                }
+            if (mPhoneService == null) {
+                loge("Ignoring feature request because could not acquire PhoneService");
+                break;
+            }
 
-                try {
-                    if (enable) {
-                        return mMSimPhoneService.enableApnType(apnType);
-                    } else {
-                        return mMSimPhoneService.disableApnType(apnType);
-                    }
-                } catch (RemoteException e) {
-                    if (retry == 0) getPhoneService(true);
+            try {
+                if (enable) {
+                    return mPhoneService.enableApnType(apnType);
+                } else {
+                    return mPhoneService.disableApnType(apnType);
                 }
-            } else {
-                if (mPhoneService == null) {
-                    loge("Ignoring feature request because could not acquire PhoneService");
-                    break;
-                }
-
-                try {
-                    if (enable) {
-                        return mPhoneService.enableApnType(apnType);
-                    } else {
-                        return mPhoneService.disableApnType(apnType);
-                    }
-                } catch (RemoteException e) {
-                    if (retry == 0) getPhoneService(true);
-                }
+            } catch (RemoteException e) {
+                if (retry == 0) getPhoneService(true);
             }
         }
 

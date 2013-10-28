@@ -107,6 +107,7 @@ final class Settings {
     private static final String ATTR_ENABLED_CALLER = "enabledCaller";
     private static final String ATTR_STOPPED = "stopped";
     private static final String ATTR_INSTALLED = "inst";
+    private static final String ATTR_PRIVACY_GUARD = "privacy-guard";
 
     private final File mSettingsFilename;
     private final File mBackupSettingsFilename;
@@ -450,10 +451,18 @@ final class Settings {
                             final boolean installed = installUser == null
                                     || installUser.getIdentifier() == UserHandle.USER_ALL
                                     || installUser.getIdentifier() == user.id;
+                            boolean privacyGuard = false;
+                            if (installUser != null) {
+                                privacyGuard = android.provider.Settings.Secure.getIntForUser(
+                                    mContext.getContentResolver(),
+                                    android.provider.Settings.Secure.PRIVACY_GUARD_DEFAULT,
+                                    0, user.id) == 1;
+                            }
                             p.setUserState(user.id, COMPONENT_ENABLED_STATE_DEFAULT,
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
+                                    privacyGuard,
                                     null, null, null);
                             writePackageRestrictionsLPr(user.id);
                         }
@@ -475,8 +484,6 @@ final class Settings {
                         p.appId = dis.appId;
                         // Clone permissions
                         p.grantedPermissions = new HashSet<String>(dis.grantedPermissions);
-                        p.revokedPermissions = new HashSet<String>(dis.revokedPermissions);
-                        updateEffectivePermissions(p);
                         // Clone component info
                         List<UserInfo> users = getAllUsers();
                         if (users != null) {
@@ -527,12 +534,6 @@ final class Settings {
             }
         }
         return p;
-    }
-
-    private static void updateEffectivePermissions(final GrantedPermissions gp) {
-        gp.effectivePermissions.clear();
-        gp.effectivePermissions.addAll(gp.grantedPermissions);
-        gp.effectivePermissions.removeAll(gp.revokedPermissions);
     }
 
     void insertPackageSettingLPw(PackageSetting p, PackageParser.Package pkg) {
@@ -859,6 +860,7 @@ final class Settings {
                                 true,   // installed
                                 false,  // stopped
                                 false,  // notLaunched
+                                false,  // privacy guard
                                 null, null, null);
                     }
                     return;
@@ -915,6 +917,9 @@ final class Settings {
                     final String notLaunchedStr = parser.getAttributeValue(null, ATTR_NOT_LAUNCHED);
                     final boolean notLaunched = stoppedStr == null
                             ? false : Boolean.parseBoolean(notLaunchedStr);
+                    final String privacyGuardStr = parser.getAttributeValue(null, ATTR_PRIVACY_GUARD);
+                    final boolean privacyGuard = privacyGuardStr == null
+                            ? false : Boolean.parseBoolean(privacyGuardStr);
 
                     HashSet<String> enabledComponents = null;
                     HashSet<String> disabledComponents = null;
@@ -935,7 +940,7 @@ final class Settings {
                         }
                     }
 
-                    ps.setUserState(userId, enabled, installed, stopped, notLaunched,
+                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, privacyGuard,
                             enabledCaller, enabledComponents, disabledComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
@@ -1041,7 +1046,7 @@ final class Settings {
 
             for (final PackageSetting pkg : mPackages.values()) {
                 PackageUserState ustate = pkg.readUserState(userId);
-                if (ustate.stopped || ustate.notLaunched || !ustate.installed
+                if (ustate.stopped || ustate.notLaunched || !ustate.installed || ustate.privacyGuard
                         || ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT
                         || (ustate.enabledComponents != null
                                 && ustate.enabledComponents.size() > 0)
@@ -1067,6 +1072,9 @@ final class Settings {
                             serializer.attribute(null, ATTR_ENABLED_CALLER,
                                     ustate.lastDisableAppCaller);
                         }
+                    }
+                    if (ustate.privacyGuard) {
+                        serializer.attribute(null, ATTR_PRIVACY_GUARD, "true");
                     }
                     if (ustate.enabledComponents != null
                             && ustate.enabledComponents.size() > 0) {
@@ -1316,13 +1324,6 @@ final class Settings {
                     serializer.endTag(null, TAG_ITEM);
                 }
                 serializer.endTag(null, "perms");
-                serializer.startTag(null, "revoked-perms");
-                for (String name : usr.revokedPermissions) {
-                    serializer.startTag(null, "item");
-                    serializer.attribute(null, "name", name);
-                    serializer.endTag(null, "item");
-                }
-                serializer.endTag(null, "revoked-perms");
                 serializer.endTag(null, "shared-user");
             }
 
@@ -1483,19 +1484,6 @@ final class Settings {
             }
         }
         serializer.endTag(null, "perms");
-        serializer.startTag(null, "revoked-perms");
-        if (pkg.sharedUser == null) {
-            // If this is a shared user, the permissions will
-            // be written there.  We still need to write an
-            // empty permissions list so permissionsFixed will
-            // be set.
-            for (final String name : pkg.revokedPermissions) {
-                serializer.startTag(null, "item");
-                serializer.attribute(null, "name", name);
-                serializer.endTag(null, "item");
-            }
-        }
-        serializer.endTag(null, "revoked-perms");
         serializer.endTag(null, "updated-package");
     }
 
@@ -1547,19 +1535,6 @@ final class Settings {
                 }
             }
             serializer.endTag(null, "perms");
-            serializer.startTag(null, "revoked-perms");
-            if (pkg.sharedUser == null) {
-                // If this is a shared user, the permissions will
-                // be written there. We still need to write an
-                // empty permissions list so permissionsFixed will
-                // be set.
-                for (final String name : pkg.revokedPermissions) {
-                    serializer.startTag(null, TAG_ITEM);
-                    serializer.attribute(null, ATTR_NAME, name);
-                    serializer.endTag(null, TAG_ITEM);
-                }
-            }
-            serializer.endTag(null, "revoked-perms");
         }
 
         serializer.endTag(null, "package");
@@ -2124,8 +2099,6 @@ final class Settings {
             String tagName = parser.getName();
             if (tagName.equals("perms")) {
                 readGrantedPermissionsLPw(parser, ps.grantedPermissions);
-            } else if (tagName.equals("revoked-perms")) {
-                readGrantedPermissionsLPw(parser, ps.revokedPermissions);
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <updated-package>: " + parser.getName());
@@ -2336,8 +2309,6 @@ final class Settings {
                 } else if (tagName.equals("perms")) {
                     readGrantedPermissionsLPw(parser, packageSetting.grantedPermissions);
                     packageSetting.permissionsFixed = true;
-                } else if (tagName.equals("revoked-perms")) {
-                    readGrantedPermissionsLPw(parser, packageSetting.revokedPermissions);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
@@ -2454,8 +2425,6 @@ final class Settings {
                     su.signatures.readXml(parser, mPastSignatures);
                 } else if (tagName.equals("perms")) {
                     readGrantedPermissionsLPw(parser, su.grantedPermissions);
-                } else if (tagName.equals("revoked-perms")) {
-                    readGrantedPermissionsLPw(parser, su.revokedPermissions);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <shared-user>: " + parser.getName());
@@ -2506,8 +2475,7 @@ final class Settings {
             ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
             // Need to create a data directory for all apps under this user.
             installer.createUserData(ps.name,
-                    UserHandle.getUid(userHandle, ps.appId), userHandle,
-                    ps.pkg.applicationInfo.seinfo);
+                    UserHandle.getUid(userHandle, ps.appId), userHandle);
         }
         readDefaultPreferredAppsLPw(service, userHandle);
         writePackageRestrictionsLPr(userHandle);
@@ -2611,6 +2579,14 @@ final class Settings {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
         return pkg.installerPackageName;
+    }
+
+    boolean getPrivacyGuardSettingLPr(String packageName, int userId) {
+        final PackageSetting pkg = mPackages.get(packageName);
+        if (pkg == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return pkg.isPrivacyGuard(userId);
     }
 
     int getApplicationEnabledSettingLPr(String packageName, int userId) {

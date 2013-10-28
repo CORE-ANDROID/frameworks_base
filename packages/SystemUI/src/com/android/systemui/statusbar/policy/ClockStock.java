@@ -41,6 +41,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import libcore.icu.LocaleData;
+
 import com.android.internal.R;
 
 /**
@@ -128,12 +130,14 @@ public class ClockStock extends TextView {
 
     private final CharSequence getSmallTime() {
         Context context = getContext();
+        boolean is24 = DateFormat.is24HourFormat(context);
+        LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
 
         final char MAGIC1 = '\uEF00';
         final char MAGIC2 = '\uEF01';
 
         SimpleDateFormat sdf;
-        String format = DateFormat.getTimeFormatString(context); //XXX: correct?
+        String format = is24 ? d.timeFormat24 : d.timeFormat12;
         if (!format.equals(mClockFormatString)) {
             /*
              * Search for an unquoted "a" in the format string, so we can

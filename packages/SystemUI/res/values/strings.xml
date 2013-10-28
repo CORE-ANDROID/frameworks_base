@@ -20,11 +20,6 @@
     <!-- Name of the status bar as seen in the applications info settings page. [CHAR LIMIT=12] -->
     <string name="app_label">System UI</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_screenshot">Capture screenshot</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_screenshot">Allows the app to cature a screenshot. This is protected by SystemUI.</string>
-
     <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="status_bar_clear_all_button">Clear</string>
@@ -46,6 +41,9 @@
     <!-- Title shown in recents popup for inspecting an application's properties -->
     <string name="status_bar_recent_inspect_item_title">App info</string>
 
+    <!-- Title shown in recents popup for showing app in floating mode -->
+    <string name="status_bar_recent_floating_item_title">Floating mode</string>
+
     <!-- Message shown in the middle of the screen after clicking on the recent apps button
          when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]-->
     <string name="status_bar_no_recent_apps">No recent apps</string>
@@ -53,6 +51,8 @@
     <!-- Content description for the button to dismiss Recent Apps (only present on large
          devices) -->
     <string name="status_bar_accessibility_dismiss_recents">Dismiss recent apps</string>
+
+    <string name="recents_google_now_button_text">Google Now</string>
 
     <!-- Message that is read when you enter recent apps in TalkBack -->
     <plurals name="status_bar_accessibility_recent_apps">
@@ -440,12 +440,17 @@
     <!-- Notification text: when GPS has found a fix [CHAR LIMIT=50] -->
     <string name="gps_notification_found_text">Location set by GPS</string>
 
+    <!-- Content description of the halo button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_halo">Create notification halo.</string> 
+
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
-    <!-- Title shown in notification popup for inspecting the responsible
-         application -->
+    <!-- Title shown in notification popup for inspecting the responsible application -->
     <string name="status_bar_notification_inspect_item_title">App info</string>
+
+    <!-- Title shown in notification popup for launching notification in floating mode -->
+    <string name="status_bar_notification_floating_item_title">Floating mode</string>
 
     <!-- [CHAR LIMIT=NONE] -->
     <string name="close_universe">Close</string>
@@ -468,6 +473,8 @@
 
     <!-- Name of the Jelly Bean platlogo screensaver -->
     <string name="jelly_bean_dream_name">BeanFlinger</string>
+    <string name="bean_dream_settings_cid_title">Use XeHD logo</string>
+    <string name="bean_dream_settings_cid_summary">Use XeHD logo instead of jellybean inside the dream</string>
 
     <!-- Name of the launcher shortcut icon that allows dreams to be started immediately [CHAR LIMIT=20] -->
     <string name="start_dreams">Daydream</string>
@@ -525,21 +532,6 @@
     <string name="quick_settings_brightness_dialog_title">Brightness</string>
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_auto_brightness_label">AUTO</string>
-    <string name="quick_settings_swagger">Swagger</string>
-    <string name="quick_settings_swaggersun">Swagger Sunday</string>
-    <string name="quick_settings_fbgt">FBGT</string>
-    <string name="quick_settings_recording">Recording...</string>
-    <string name="quick_settings_recordingcap">Recording Captured</string>
-    <string name="quick_settings_playing">Playing...</string>
-    <string name="quick_settings_quickrecord">Quick Record</string>
-    <string name="quick_settings_nofile">Long Press To Record</string>
-    <string name="quick_settings_sleep">Sleep</string>
-    <string name="quick_settings_reboot">Reboot</string>
-    <string name="quick_settings_reboot_message">Your device is rebooting</string>
-    <string name="quick_settings_stayawake_on">Stay Awake On</string>
-    <string name="quick_settings_stayawake_off">Stay Awake Off</string>
-    <string name="quick_settings_adb_on"><xliff:g id="ip" example="192.168.1.5">%s</xliff:g></string>
-    <string name="quick_settings_adb_off">Wireless ADB Off</string>
 
     <!-- Title of help text shown when the notification panel is pulled down for the very first time. [CHAR LIMIT=NONE] -->
     <string name="status_bar_help_title">Notifications appear here</string>
@@ -555,7 +547,7 @@
     <string name="ribbon">Ribbon</string>
 
     <!--  Target/Action Strings -->
-    <string name="shortcut_label">AOKP Actions</string>
+    <string name="shortcut_label">XeHD Actions</string>
     <string name="action_home">Home</string>
     <string name="action_back">Back</string>
     <string name="action_recents">Recents</string>
@@ -570,7 +562,6 @@
     <string name="action_none">Empty</string>
 
     <string name="widgets">Widgets</string>
-    <string name="toggle_quiethours">QuietHours - Toggle</string>
     <string name="toggle_navbar">NavBar - Toggle</string>
     <string name="toggle_statusbar">StatusBar - Toggle</string>
     <string name="toggle_widgets">Widgets - Toggle</string>
@@ -578,8 +569,7 @@
     <string name="toggle_ring_silent">Ring/Silent - Toggle</string>
     <string name="toggle_ring_vib_silent">Ring/Vib/Silent - Toggle</string>
     <string name="app_killed_message">App Killed</string>
-    <string name="recents_kill_all_button_text">Kill all</string>
-    <string name="recents_google_now_button_text">Google Now</string>
+    <string name="recents_kill_all_button_text">Clear</string>
     <string name="screenshot_toast">Screenshot in %1$d seconds</string>
 
     <!--  Quick Settings -->
@@ -616,34 +606,56 @@
     <string name="quick_settings_sound_on">Sound on</string>
     <string name="quick_settings_statusbar_on_label">StatusBar On</string>
     <string name="quick_settings_statusbar_off_label">StatusBar Off</string>
-    <string name="quick_settings_swaggersuntoast">#SwaggerSunday</string>
+    <string name="quick_settings_pie_on_label">Pie On</string>
+    <string name="quick_settings_pie_off_label">Pie Off</string>
+    <string name="quick_settings_powermenu">Power Menu</string>
+    <string name="quick_settings_sleep">Sleep</string>
+    <string name="quick_settings_reboot">Reboot</string>
     <string name="quick_settings_screenshot">Screenshot</string>
-
-    <!--  RamBar -->
+    <string name="quick_settings_volume_label">Volume</string>
+    <string name="quick_settings_screen">Screen off</string>
+    <string name="quick_settings_swagger">Swagger</string>
+    <string name="quick_settings_fbgt">FBGT</string>
+    <string name="quick_settings_recording">Recording...</string>
+    <string name="quick_settings_recordingcap">Recording Captured</string>
+    <string name="quick_settings_playing">Playing...</string>
+    <string name="quick_settings_quickrecord">Quick Record</string>
+    <string name="quick_settings_nofile">Long Press To Record</string>
+    <string name="quick_settings_reboot_message">Your device is rebooting</string>
+    <string name="quick_settings_stayawake_on">Stay Awake On</string>
+    <string name="quick_settings_stayawake_off">Stay Awake Off</string>
+    <string name="quick_settings_adb_on"><xliff:g id="ip" example="192.168.1.5">%s</xliff:g></string>
+    <string name="quick_settings_adb_off">Wireless ADB Off</string>
+    
+    <!-- Recents Ram Bar -->
     <string name="memory">RAM</string>
     <!-- [CHAR LIMIT=10] Running services, summary of background processes -->
-    <string name="service_background_processes"><xliff:g id="memory">%1$s</xliff:g> free</string>
+    <string name="service_free_mem"><xliff:g id="memory">%1$s</xliff:g> free</string>
     <!-- [CHAR LIMIT=10] Running services, summary of foreground processes -->
-    <string name="service_foreground_processes"><xliff:g id="memory">%1$s</xliff:g> used</string>
-    <!-- Text to label a process entry with the process name. -->
-    <string name="service_process_name"><xliff:g id="process">%1$s</xliff:g></string>
-    <!-- Running services, description for a service in the started state -->
-    <string name="service_client_name"><xliff:g id="client_name">%1$s</xliff:g></string>
-    <!-- Running services, description for a service in the started state -->
-    <string name="service_started_by_app">Started by app.</string>
-    <!-- Descriptive text of a running process: singular process, singular service. -->
-    <string name="running_processes_item_description_s_s"><xliff:g id="numprocess">%1$d</xliff:g>
-        process and <xliff:g id="numservices">%2$d</xliff:g> service</string>
-    <!-- Descriptive text of a running process: singular process, plural service. -->
-    <string name="running_processes_item_description_s_p"><xliff:g id="numprocess">%1$d</xliff:g>
-        process and <xliff:g id="numservices">%2$d</xliff:g> services</string>
-     <!-- Descriptive text of a running process: plural process, singular service. -->
-    <string name="running_processes_item_description_p_s"><xliff:g id="numprocess">%1$d</xliff:g>
-        processes and <xliff:g id="numservices">%2$d</xliff:g> service</string>
-    <!-- Descriptive text of a running process: plural process, plural service. -->
-    <string name="running_processes_item_description_p_p"><xliff:g id="numprocess">%1$d</xliff:g>
-        processes and <xliff:g id="numservices">%2$d</xliff:g> services</string>
-    <!-- [CHAR LIMIT=NONE] Label of a running process that represents another user -->
-    <string name="running_process_item_user_label">User: <xliff:g id="user_name">%1$s</xliff:g></string>
+    <string name="service_used_mem"><xliff:g id="memory">%1$s</xliff:g> used</string>
 
+    <!-- Halo -->
+    <string name="halo_dismiss">Dismiss notification</string>
+    <string name="halo_hide">Hide</string>
+    <string name="halo_clear_all">Dismiss all notifications</string>
+    <string name="halo_silence">Hide &amp; silence until woken</string>
+    <string name="halo_tutorial1">This is HALO</string>
+    <string name="halo_tutorial2">Move me: 2x-tap &amp; drag</string>
+    <string name="halo_tutorial3">Browse tasks: Horizontal drag</string>
+    <string name="halo_battery_plugged">CHARGING</string>
+    <string name="halo_battery_unplugged">REMAINING</string>
+    <string name="halo_battery_full">FULL</string>
+    <string name="halo_aeroplane1">AEROPLANE</string>
+    <string name="halo_aeroplane2">MODE</string>
+    <string name="halo_wifi_on">WI-FI ON</string>
+    <string name="halo_wifi_off">WI-FI OFF</string>
+    <string name="halo_signal_bars_4">FULL</string>
+    <string name="halo_signal_bars_3">THREE BARS</string>
+    <string name="halo_signal_bars_2">TWO BARS</string>
+    <string name="halo_signal_bars_1">ONE BAR</string>
+    <string name="halo_signal_bars_none">NO BARS</string>
+
+
+    <!--ScreenShot Trash-->
+    <string name="trash">Trash</string>
 </resources>

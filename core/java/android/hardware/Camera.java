@@ -869,7 +869,7 @@ public class Camera {
 
             case CAMERA_MSG_META_DATA:
                 if (mCameraMetaDataCallback != null) {
-                    mCameraMetaDataCallback.onCameraMetaData((byte[])msg.obj, mCamera);
+                    mCameraMetaDataCallback.onCameraMetaData((int[])msg.obj, mCamera);
                 }
                 return;
             /* ### QC ADD-ONS: END */
@@ -1481,23 +1481,6 @@ public class Camera {
          * as a set. Either they are all valid, or none of them are.
          */
         public Point mouth = null;
-
-        /**
-         * {@hide}
-         */
-        public int smileDegree = 0;
-        /**
-         * {@hide}
-         */
-        public int smileScore = 0;
-        /**
-         * {@hide}
-         */
-        public int blinkDetected = 0;
-        /**
-         * {@hide}
-         */
-        public int faceRecognised = 0;
     }
 
     // Error codes match the enum in include/ui/Camera.h
@@ -1554,7 +1537,6 @@ public class Camera {
      * @see #getParameters()
      */
     public void setParameters(Parameters params) {
-        Log.v(TAG, "setParameters:"+params.flatten());
         native_setParameters(params.flatten());
     }
 
@@ -1638,24 +1620,25 @@ public class Camera {
         /**
          * Callback for when camera meta data is available.
          *
-         * @param data   a byte array of the camera meta data
+         * @param data   a int array of the camera meta data
          * @param camera the Camera service object
          */
-        void onCameraMetaData(byte[] data, Camera camera);
+        void onCameraMetaData(int[] data, Camera camera);
     };
 
     /** @hide
-     * Set camera meta data and registers a callback function to run.
+     * Set camera face detection mode and registers a callback function to run.
      *  Only valid after startPreview() has been called.
      *
      * @param cb the callback to run
      */
-    public final void setMetadataCb(CameraMetaDataCallback cb)
+    //TBD
+    public final void setFaceDetectionCb(CameraMetaDataCallback cb)
     {
         mCameraMetaDataCallback = cb;
-        native_setMetadataCb(cb!=null);
+        native_setFaceDetectionCb(cb!=null);
     }
-    private native final void native_setMetadataCb(boolean mode);
+    private native final void native_setFaceDetectionCb(boolean mode);
 
     /** @hide
      * Set camera face detection command to send meta data.
@@ -1665,17 +1648,6 @@ public class Camera {
         native_sendMetaData();
     }
     private native final void native_sendMetaData();
-
-    /** @hide
-     * Configure longshot mode. Available only in ZSL.
-     *
-     * @param enable enable/disable this mode
-     */
-    public final void setLongshot(boolean enable)
-    {
-        native_setLongshot(enable);
-    }
-    private native final void native_setLongshot(boolean enable);
 
      /** @hide
      * Handles the Touch Co-ordinate.
@@ -1990,6 +1962,12 @@ public class Camera {
         /** @hide */
         public static final String ISO_HJR = "ISO_HJR";
         /** @hide */
+        public static final String ISO_SPORTS = "ISO_SPORTS";
+        /** @hide */
+        public static final String ISO_NIGHT = "ISO_NIGHT";
+        /** @hide */
+        public static final String ISO_MOVIE = "ISO_MOVIE";
+        /** @hide */
         public static final String ISO_100 = "ISO100";
         /** @hide */
         public static final String ISO_200 = "ISO200";
@@ -1999,6 +1977,10 @@ public class Camera {
         public static final String ISO_800 = "ISO800";
         /** @hide */
         public static final String ISO_1600 = "ISO1600";
+        /** @hide */
+        public static final String ISO_3200 = "ISO3200";
+        /** @hide */
+        public static final String ISO_6400 = "ISO6400";
 
         /** @hide
          * Scene mode is off.
@@ -3178,7 +3160,7 @@ public class Camera {
          * @see #getFlashMode()
          */
         public void setFlashMode(String value) {
-            if(getSupportedFlashModes() == null) return;
+	    if(getSupportedFlashModes() == null) return;
             set(KEY_FLASH_MODE, value);
         }
 
@@ -4093,7 +4075,6 @@ public class Camera {
         private static final String KEY_QC_ZSL = "zsl";
         private static final String KEY_QC_CAMERA_MODE = "camera-mode";
         private static final String KEY_QC_VIDEO_HIGH_FRAME_RATE = "video-hfr";
-        private static final String KEY_QC_VIDEO_HDR = "video-hdr";
         /** @hide
         * KEY_QC_AE_BRACKET_HDR
         **/
@@ -4393,17 +4374,6 @@ public class Camera {
          */
          public List<String> getSupportedZSLModes() {
             String str = get(KEY_QC_ZSL + SUPPORTED_VALUES_SUFFIX);
-            return split(str);
-         }
-
-         /** @hide
-         * Gets the supported Video HDR modes.
-         *
-         * @return a List of Video HDR_OFF/OFF string constants. null if
-         * Video HDR mode setting is not supported.
-         */
-         public List<String> getSupportedVideoHDRModes() {
-            String str = get(KEY_QC_VIDEO_HDR + SUPPORTED_VALUES_SUFFIX);
             return split(str);
          }
 
@@ -4881,24 +4851,6 @@ public class Camera {
          */
          public void setVideoHighFrameRate(String hfr) {
             set(KEY_QC_VIDEO_HIGH_FRAME_RATE, hfr);
-         }
-
-         /** @hide
-         * Gets the current Video HDR Mode.
-         *
-         * @return Video HDR mode value
-         */
-         public String getVideoHDRMode() {
-            return get(KEY_QC_VIDEO_HDR);
-         }
-
-         /** @hide
-         * Sets the current Video HDR Mode.
-         *
-         * @return null
-         */
-         public void setVideoHDRMode(String videohdr) {
-            set(KEY_QC_VIDEO_HDR, videohdr);
          }
 
          /** @hide

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 ParanoidAndroid Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +23,7 @@ import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
@@ -183,6 +185,21 @@ public class RecentsVerticalScrollView extends ScrollView
     @Override
     public void removeViewInLayout(final View view) {
         dismissChild(view);
+    }
+
+    @Override
+    public void removeAllViewsInLayout() {
+        smoothScrollTo(0, 0);
+        int count = mLinearLayout.getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = mLinearLayout.getChildAt(i);
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    dismissChild(child);
+                }
+            }, i * 150);
+        }
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {

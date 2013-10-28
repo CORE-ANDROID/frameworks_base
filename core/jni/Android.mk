@@ -85,6 +85,7 @@ LOCAL_SRC_FILES:= \
 	android_util_XmlBlock.cpp \
 	android_util_PackageRedirectionMap.cpp \
 	android/graphics/AutoDecodeCancel.cpp \
+	android/graphics/Bitmap.cpp \
 	android/graphics/BitmapFactory.cpp \
 	android/graphics/Camera.cpp \
 	android/graphics/Canvas.cpp \
@@ -148,12 +149,6 @@ LOCAL_SRC_FILES:= \
 	android_content_res_Configuration.cpp \
 	android_animation_PropertyValuesHolder.cpp \
 	com_android_internal_net_NetworkStatsFactory.cpp
-
-ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
-    LOCAL_CFLAGS += -DQCOM_HARDWARE
-    LOCAL_SRC_FILES += \
-	    com_android_internal_app_ActivityTrigger.cpp
-endif
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
@@ -219,26 +214,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libusbhost \
 	libharfbuzz_ng \
 	libz
-
-ifeq ($(TARGET_ARCH), arm)
-  ifeq ($(TARGET_USE_KRAIT_BIONIC_OPTIMIZATION), true)
-    TARGET_arm_CFLAGS += -DUSE_NEON_BITMAP_OPTS -mvectorize-with-neon-quad
-    LOCAL_SRC_FILES+= \
-		android/graphics/Bitmap.cpp.arm
-  else
-    ifeq ($(TARGET_CPU_VARIANT), cortex-a15)
-      TARGET_arm_CFLAGS += -DUSE_NEON_BITMAP_OPTS -mvectorize-with-neon-quad
-      LOCAL_SRC_FILES+= \
-		android/graphics/Bitmap.cpp.arm
-    else
-      LOCAL_SRC_FILES+= \
-		android/graphics/Bitmap.cpp
-    endif
-  endif
-else
-    LOCAL_SRC_FILES+= \
-		android/graphics/Bitmap.cpp
-endif
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

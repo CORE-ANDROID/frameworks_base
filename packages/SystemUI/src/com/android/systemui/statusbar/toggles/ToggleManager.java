@@ -10,13 +10,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.location.LocationManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -29,15 +25,14 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
-import com.android.internal.telephony.PhoneConstants;
 import com.android.systemui.R;
-import com.android.systemui.settings.BrightnessController;
-import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsTileView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BrightnessController;
+import com.android.systemui.statusbar.policy.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -75,31 +70,28 @@ public class ToggleManager {
     public static final String BATTERY_TOGGLE = "BATTERY";
     public static final String AIRPLANE_TOGGLE = "AIRPLANE_MODE";
     public static final String BLUETOOTH_TOGGLE = "BLUETOOTH";
-    public static final String SWAGGER_TOGGLE = "SWAGGER";
-    public static final String VIBRATE_TOGGLE = "VIBRATE";
-    public static final String SILENT_TOGGLE = "SILENT";
-    public static final String FCHARGE_TOGGLE = "FCHARGE";
+    // public static final String SWAGGER_TOGGLE = "SWAGGER";
     public static final String SYNC_TOGGLE = "SYNC";
     public static final String NFC_TOGGLE = "NFC";
-    public static final String TORCH_TOGGLE = "TORCH";
     public static final String WIFI_TETHER_TOGGLE = "WIFITETHER";
     // public static final String BT_TETHER_TOGGLE = "BTTETHER";
     public static final String USB_TETHER_TOGGLE = "USBTETHER";
     public static final String TWOG_TOGGLE = "2G";
     public static final String LTE_TOGGLE = "LTE";
-    public static final String FAV_CONTACT_TOGGLE = "FAVCONTACT";
-    public static final String SOUND_STATE_TOGGLE = "SOUNDSTATE";
-    public static final String NAVBAR_HIDE_TOGGLE = "NAVBARHIDE";
     public static final String QUICKRECORD_TOGGLE = "QUICKRECORD";
-    public static final String QUIETHOURS_TOGGLE = "QUIETHOURS";
     public static final String SLEEP_TOGGLE = "SLEEP";
-    public static final String STATUSBAR_TOGGLE = "STATUSBAR";
-    public static final String SCREENSHOT_TOGGLE = "SCREENSHOT";
+    public static final String POWER_MENU_TOGGLE = "POWERMENU";
     public static final String REBOOT_TOGGLE = "REBOOT";
-    public static final String CUSTOM_TOGGLE = "CUSTOM";
+    public static final String VIBRATE_TOGGLE = "VIBRATE";
+    public static final String SILENT_TOGGLE = "SILENT";
+    public static final String SOUND_STATE_TOGGLE = "SOUNDSTATE";
+    public static final String VOLUME_TOGGLE = "VOLUME";
     public static final String STAYAWAKE_TOGGLE = "STAYAWAKE";
     public static final String WIRELESS_ADB_TOGGLE = "WIRELESSADB";
-
+    public static final String STATUSBAR_TOGGLE = "STATUSBAR";
+    public static final String CUSTOM_TOGGLE = "CUSTOM";
+    public static final String FAV_CONTACT_TOGGLE = "FAVCONTACT";
+    
     private int mStyle;
 
     public static final int STYLE_TILE = 0;
@@ -123,51 +115,34 @@ public class ToggleManager {
             toggleMap.put(BRIGHTNESS_TOGGLE, BrightnessToggle.class);
             toggleMap.put(SETTINGS_TOGGLE, SettingsToggle.class);
             toggleMap.put(WIFI_TOGGLE, WifiToggle.class);
-            if (deviceSupportsTelephony()) {
-                toggleMap.put(SIGNAL_TOGGLE, SignalToggle.class);
-                toggleMap.put(WIFI_TETHER_TOGGLE, WifiApToggle.class);
-            }
+            toggleMap.put(SIGNAL_TOGGLE, SignalToggle.class);
             toggleMap.put(ROTATE_TOGGLE, RotateToggle.class);
             toggleMap.put(CLOCK_TOGGLE, ClockToggle.class);
             toggleMap.put(GPS_TOGGLE, GpsToggle.class);
             toggleMap.put(IME_TOGGLE, ImeToggle.class);
             toggleMap.put(BATTERY_TOGGLE, BatteryToggle.class);
             toggleMap.put(AIRPLANE_TOGGLE, AirplaneModeToggle.class);
-            if (deviceSupportsBluetooth()) {
-                toggleMap.put(BLUETOOTH_TOGGLE, BluetoothToggle.class);
-            }
-            toggleMap.put(SWAGGER_TOGGLE, SwaggerToggle.class);
-            if (((Vibrator)mContext.getSystemService(Context.VIBRATOR_SERVICE)).hasVibrator()) {
-                toggleMap.put(VIBRATE_TOGGLE, VibrateToggle.class);
-                toggleMap.put(SOUND_STATE_TOGGLE, SoundStateToggle.class);
-            }
-            toggleMap.put(SILENT_TOGGLE, SilentToggle.class);
-            toggleMap.put(FCHARGE_TOGGLE, FastChargeToggle.class);
+            toggleMap.put(BLUETOOTH_TOGGLE, BluetoothToggle.class);
+            // toggleMap.put(SWAGGER_TOGGLE, SwaggerToggle.class);
             toggleMap.put(SYNC_TOGGLE, SyncToggle.class);
-            if (mContext.getSystemService(Context.NFC_SERVICE) != null) {
-                toggleMap.put(NFC_TOGGLE, NfcToggle.class);
-            }
-            toggleMap.put(TORCH_TOGGLE, TorchToggle.class);
+            toggleMap.put(NFC_TOGGLE, NfcToggle.class);
+            toggleMap.put(WIFI_TETHER_TOGGLE, WifiApToggle.class);
             toggleMap.put(USB_TETHER_TOGGLE, UsbTetherToggle.class);
-            if (((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
-                    .getPhoneType() == PhoneConstants.PHONE_TYPE_GSM) {
-                toggleMap.put(TWOG_TOGGLE, TwoGToggle.class);
-            }
-            if (TelephonyManager.getLteOnCdmaModeStatic() == PhoneConstants.LTE_ON_CDMA_TRUE
-                    || TelephonyManager.getLteOnGsmModeStatic() != 0) {
-                toggleMap.put(LTE_TOGGLE, LteToggle.class);
-            }
-            toggleMap.put(FAV_CONTACT_TOGGLE, FavoriteUserToggle.class);
-            toggleMap.put(NAVBAR_HIDE_TOGGLE, NavbarHideToggle.class);
+            toggleMap.put(TWOG_TOGGLE, TwoGToggle.class);
+            toggleMap.put(LTE_TOGGLE, LteToggle.class);
             toggleMap.put(QUICKRECORD_TOGGLE, QuickRecordToggle.class);
-            toggleMap.put(QUIETHOURS_TOGGLE, QuietHoursToggle.class);
             toggleMap.put(SLEEP_TOGGLE, SleepToggle.class);
-            toggleMap.put(STATUSBAR_TOGGLE, StatusbarToggle.class);
-            toggleMap.put(SCREENSHOT_TOGGLE, ScreenshotToggle.class);
+            toggleMap.put(POWER_MENU_TOGGLE, PowerMenuToggle.class);
             toggleMap.put(REBOOT_TOGGLE, RebootToggle.class);
-            toggleMap.put(CUSTOM_TOGGLE, CustomToggle.class);
+            toggleMap.put(VIBRATE_TOGGLE, VibrateToggle.class);
+            toggleMap.put(SILENT_TOGGLE, SilentToggle.class);
+            toggleMap.put(SOUND_STATE_TOGGLE, SoundStateToggle.class);
+            toggleMap.put(VOLUME_TOGGLE, VolumeToggle.class);
             toggleMap.put(STAYAWAKE_TOGGLE, StayAwakeToggle.class);
             toggleMap.put(WIRELESS_ADB_TOGGLE, WirelessAdbToggle.class);
+            toggleMap.put(STATUSBAR_TOGGLE, StatusbarToggle.class);
+            toggleMap.put(CUSTOM_TOGGLE, CustomToggle.class);
+            toggleMap.put(FAV_CONTACT_TOGGLE, FavoriteUserToggle.class);
             // toggleMap.put(BT_TETHER_TOGGLE, null);
         }
         return toggleMap;
@@ -186,7 +161,6 @@ public class ToggleManager {
             }
         };
         mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(ACTION_REQUEST_TOGGLES));
-
     }
 
     public void cleanup() {

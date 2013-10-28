@@ -163,14 +163,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"機内モード"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"機内モードON"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"機内モードOFF"</string>
-
-    <!-- label for item that screenshots in phone options dialog -->
-    <string name="global_action_screenshot">スクリーンショット</string>
-    <!-- label for item that torches in phone options dialog -->
-    <string name="global_action_torch">トーチ</string>
-    <!-- label for item that toggles NavBar Hide -->
-    <string name="global_actions_toggle_navbar_hide">システムバー</string>
-
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Androidシステム"</string>
@@ -235,11 +227,6 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USBストレージへのアクセス"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SDカードにアクセスします。"</string>
-
-    <!-- Superuser application permission, allows applications to call the superuser binary (su) -->
-    <string name="permlab_accessSuperuser">すべてのデバイス機能とストレージへのフルアクセス</string>
-    <string name="permdesc_accessSuperuser">Superuserはセキュアな機密ハードウェア要素を含むすべてのデバイス機能とストレージへのフルアクセスを許可します。このアクセス許可は危険性があります。</string>
-
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"ユーザー補助機能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"補助テクノロジーがリクエストできる機能です。"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
@@ -405,8 +392,6 @@
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"他のアプリのキャッシュディレクトリからファイルを削除して端末のストレージ領域を解放することをアプリに許可します。他のアプリはデータを再取得する必要があるため、これにより他のアプリの起動が遅れる場合があります。"</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"アプリのリソースの移動"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"内部メディアと外部メディアの間でアプリのリソースを移動することをアプリに許可します。"</string>
-    <string name="permlab_preventpower">電源キーの無効化</string>
-    <string name="permdesc_preventpower">電源キーを無効にすることをアプリに許可します。</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"機密ログデータの読み取り"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"システムの各種ログファイルの読み取りをアプリに許可します。許可すると、アプリではタブレットの使用に関する全般的な情報を読み取れるようになります。この情報には個人情報や機密情報が含まれる場合があります。"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"システムの各種ログファイルの読み取りをアプリに許可します。許可すると、アプリでは携帯端末の使用に関する全般的な情報を読み取れるようになります。この情報には個人情報や機密情報が含まれる場合があります。"</string>
@@ -511,17 +496,6 @@
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"内部ストレージ名の変更をアプリに許可します。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"バイブレーションの制御をアプリに許可します。"</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fm_radio_receiver">FMレシーバーの制御</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fm_radio_receiver">FMレシーバーの制御をアプリに許可します。</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fm_radio_transmitter">FMトランスミッターの制御</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fm_radio_transmitter">>FMトランスミッターの制御をアプリに許可します。</string>
-
     <string name="permlab_flashlight" msgid="2155920810121984215">"ライトのコントロール"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ライトの制御をアプリに許可します。"</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"USBデバイスの設定と許可の管理"</string>
@@ -651,12 +625,6 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ネットワークポリシーを管理しアプリ固有のルールを定義することをアプリに許可します。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ネットワークの課金の変更"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"アプリに対するネットワーク利用の計算方法を変更することをアプリに許可します。通常のアプリでは使用しません。"</string>
-
-    <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
-    <string name="permlab_revokePermissions">取り消した権限の表示と編集</string>
-    <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
-    <string name="permdesc_revokePermissions">取り消した権限の読み取りと書き込みをアプリに許可します。通常のアプリでは使用しません。</string>
-
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"通知にアクセス"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"通知（他のアプリから投稿されたものも含む）を取得、調査、クリアすることをアプリに許可します。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"通知リスナーサービスにバインド"</string>
@@ -822,10 +790,6 @@
     <string name="lockscreen_charged" msgid="321635745684060624">"充電完了"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"充電してください"</string>
-    <!-- Showing the Battery % while not plugged in. -->
-    <string name="lockscreen_always_battery">放電中: <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <string name="lockscreen_always_low_battery">充電してください: <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"タブレット内にSIMカードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIMカードが挿入されていません"</string>
@@ -1115,10 +1079,6 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"問題が発生したため、<xliff:g id="APPLICATION">%1$s</xliff:g>を終了します。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"問題が発生したため、プロセス「<xliff:g id="PROCESS">%1$s</xliff:g>」を終了します。"</string>
-    <!-- Title of the alert when an application is not responding. -->
-    <string name="aerr_revoked_application"><xliff:g id="application">%1$s</xliff:g> (<xliff:g id="process">%2$s</xliff:g>) が予期せず終了しました。\n警告!\nこのアプリに必要な権限が取り消されているため誤動作しているかもしれません。必要な権限を許可してからもう一度お試しください。</string>
-    <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_revoked_process">プロセス「<xliff:g id="process">%1$s</xliff:g>」が予期せず終了しました。\n警告!\nこのアプリに必要な権限が取り消されているため誤動作しているかもしれません。必要な権限を許可してからもう一度お試しください。</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>は応答していません。"\n\n"このアプリを終了しますか？"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"操作「<xliff:g id="ACTIVITY">%1$s</xliff:g>」は応答していません。"\n\n"この操作を終了しますか？"</string>
@@ -1127,8 +1087,6 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"レポート"</string>
     <string name="wait" msgid="7147118217226317732">"待機"</string>
-    <!-- Button allowing the user reset the revoked permissions for application which has encountered an error. -->
-    <string name="reset_perms">権限をリセット</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"ページが応答しません。"\n\n"ページを閉じますか？"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"アプリのリダイレクト"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>が実行中です。"</string>
@@ -1467,7 +1425,6 @@
     <string name="sending" msgid="3245653681008218030">"送信中..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ブラウザを起動しますか？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"通話を受けますか？"</string>
-    <string name="app_killed_message">アプリを強制終了しました</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"常時"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"1回のみ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"タブレット"</string>
@@ -1479,18 +1436,6 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth音声"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ワイヤレスディスプレイ"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完了"</string>
-
-    <!-- Reboot -->
-    <string name="reboot">再起動</string>
-    <!-- Reboot recovery option -->
-    <string name="reboot_recovery">リカバリー</string>
-    <!-- Reboot recovery option -->
-    <string name="reboot_download">ダウンロード</string>
-    <!-- Reboot recovery option -->
-    <string name="reboot_bootloader">ブートローダー</string>
-    <!-- Rebooting message -->
-    <string name="reboot_progress">再起動中\u2026</string>
-
     <string name="media_route_button_content_description" msgid="5758553567065145276">"メディア出力"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"スキャン中..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"接続中..."</string>
@@ -1551,72 +1496,4 @@
     <string name="app_no_restricted_accounts" msgid="4011285085817350390">"このアプリでは制限付きプロフィールのアカウントはサポートしていません"</string>
     <string name="app_not_found" msgid="3429141853498927379">"この操作を行うアプリが見つかりません"</string>
     <string name="revoke" msgid="5404479185228271586">"取り消し"</string>
-
-    <!-- Vibration picker dialog title -->
-    <string name="vibration_picker_title">バイブレーションを選択</string>
-    <string name="vibration_picker_del_title">バイブレーションを削除</string>
-
-    <!-- In WiFi notification -->
-    <string name="notify_turn_wifi_off_title">Wi-Fiをオフにする</string>
-
-    <!-- In WiFi AP notification -->
-    <string name="notify_turn_wifi_ap_off_title">Wi-Fiアクセスポイントをオフにする</string>
-
-    <!-- Hardware Rotation lock string -->
-    <string name="toast_rotation_unlocked">画面の自動回転を有効にしました</string>
-    <string name="toast_rotation_locked">画面の向きをロックしました</string>
-
-    <!-- Animation Strings -->
-    <string name="animation_fade">フェード</string>
-    <string name="animation_slide_right">右にスライド</string>
-    <string name="animation_slide_left">左にスライド</string>
-    <string name="animation_slide_right_no_fade">右にスライド (フェードなし)</string>
-    <string name="animation_slide_left_no_fade">左にスライド (フェードなし)</string>
-    <string name="animation_slide_up">下にスライド</string>
-    <string name="animation_slide_down">上にスライド</string>
-    <string name="animation_default">デフォルト</string>
-    <string name="animation_translucent">半透明</string>
-    <string name="animation_grow_shrink">拡大縮小 (上)</string>
-    <string name="animation_grow_shrink_center">拡大縮小 (中央)</string>
-    <string name="animation_grow_shrink_bottom">拡大縮小 (下)</string>
-    <string name="animation_grow_shrink_left">拡大縮小 (左)</string>
-    <string name="animation_grow_shrink_right">拡大縮小 (右)</string>
-
-    <!-- Awesome Action Stuff-->
-    <string name="action_home">ホーム</string>
-    <string name="action_back">戻る</string>
-    <string name="action_recents">アプリ履歴</string>
-    <string name="action_recents_gb">アプリ履歴(GBスタイル)</string>
-    <string name="action_search">検索</string>
-    <string name="action_screenshot">スクリーンショット</string>
-    <string name="action_menu">メニュー</string>
-    <string name="action_ime">IME変更</string>
-    <string name="action_kill">アプリ終了</string>
-    <string name="action_lastapp">直前のアプリ</string>
-    <string name="action_power">電源</string>
-    <string name="action_notifications">通知パネルの開閉</string>
-    <string name="action_assist">Google Now</string>
-    <string name="action_clockoptions">日付と時刻</string>
-    <string name="action_voiceassist">音声検索</string>
-    <string name="action_torch">トーチ</string>
-    <string name="action_silent">サウンド/サイレント</string>
-    <string name="action_vib">サウンド/バイブ</string>
-    <string name="action_silent_vib">サウンド/バイブ/サイレント</string>
-    <string name="action_event">イベント</string>
-    <string name="action_today">カレンダー</string>
-    <string name="action_alarm">アラーム</string>
-    <string name="action_unlock">アンロック</string>
-    <string name="action_camera">カメラ</string>
-    <string name="action_null">設定なし</string>
-    <string name="action_widgets">ナビゲーションウィジェット</string>
-    <string name="action_app_window">アプリウィンドウ</string>
-    <string name="action_ribbon">AOKPリボン</string>
-    <string name="action_app">アプリ/ショートカット</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_interceptSmsSent">SMS送信の遮断</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_interceptSmsSent">SMS送信の遮断をアプリに許可します。
-        悪意のあるアプリはこの権限を使ってSMSメッセージの送信を阻止するかもしれません。
-    </string>
 </resources>

@@ -41,12 +41,10 @@ public class SignalText extends TextView {
     private int style;
     private Handler mHandler;
     private Context mContext;
-    protected int mSignalColor;
+    protected int mSignalColor = com.android.internal.R.color.holo_blue_light;
     private PhoneStateIntentReceiver mPhoneStateReceiver;
 
     private SignalText mSignalText;
-
-    private SettingsObserver mSettingsObserver;
 
     private static class MyHandler extends Handler {
         private WeakReference<SignalText> mSignalText;
@@ -86,10 +84,9 @@ public class SignalText extends TextView {
 
         if (!mAttached) {
             mAttached = true;
-            mSignalColor = getTextColors().getDefaultColor();
             mHandler = new MyHandler(this);
-            mSettingsObserver = new SettingsObserver(mHandler);
-            mSettingsObserver.observe();
+            SettingsObserver settingsObserver = new SettingsObserver(mHandler);
+            settingsObserver.observe();
             mPhoneStateReceiver = new PhoneStateIntentReceiver(mContext, mHandler);
             mPhoneStateReceiver.notifySignalStrength(EVENT_SIGNAL_STRENGTH_CHANGED);
             mPhoneStateReceiver.registerIntent();
@@ -103,7 +100,6 @@ public class SignalText extends TextView {
         if (mAttached) {
             mAttached = false;
             mPhoneStateReceiver.unregisterIntent();
-            mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
         }
     }
 
@@ -129,14 +125,15 @@ public class SignalText extends TextView {
     }
 
     private void updateSettings() {
-        int newColor = 0;
         ContentResolver resolver = getContext().getContentResolver();
-        newColor = Settings.System.getInt(resolver,
-                Settings.System.STATUSBAR_SIGNAL_TEXT_COLOR,mSignalColor);
-        if (newColor < 0 && newColor != mSignalColor) {
-            mSignalColor = newColor;
-            setTextColor(mSignalColor);
+        mSignalColor = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_SIGNAL_TEXT_COLOR,
+                0xFF33B5E5);
+        if (mSignalColor == Integer.MIN_VALUE) {
+            // flag to reset the color
+            mSignalColor = 0xFF33B5E5;
         }
+        setTextColor(mSignalColor);
         updateSignalText();
     }
 

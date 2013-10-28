@@ -71,14 +71,16 @@ public class FavoriteUserToggle extends BaseToggle {
                 Settings.System.QUICK_TOGGLE_FAV_CONTACT);
 
         if (lookupKey != null && lookupKey.length() > 0) {
-            dismissKeyguard();
+        	dismissKeyguard();
             vibrateOnTouch();
             collapseStatusBar();
             Uri lookupUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI,
                     lookupKey);
             Uri res = ContactsContract.Contacts.lookupContact(mContext.getContentResolver(),
                     lookupUri);
-            Intent intent = new Intent(Intent.ACTION_VIEW, res);
+            Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
+                    mContext, v, res,
+                    ContactsContract.QuickContact.MODE_LARGE, null);
             mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
         }
     }

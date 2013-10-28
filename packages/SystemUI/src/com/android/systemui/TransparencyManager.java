@@ -125,24 +125,16 @@ public class TransparencyManager {
         }
 
         final float alpha = a;
-        ValueAnimator anim = null;
-        if (v.getBackground() instanceof BackgroundAlphaColorDrawable) {
-            final BackgroundAlphaColorDrawable bg = (BackgroundAlphaColorDrawable) v
-                    .getBackground();
-            anim = ValueAnimator.ofObject(new ArgbEvaluator(), info.color,
-                    BackgroundAlphaColorDrawable.applyAlphaToColor(bg.getBgColor(), alpha));
-            anim.addUpdateListener(new AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    info.color = (Integer) animation.getAnimatedValue();
-                    bg.setColor(info.color);
-                }
-            });
-        } else {
-            // custom image is set by the theme, let's just apply the alpha if we can.
-            v.getBackground().setAlpha(BackgroundAlphaColorDrawable.floatAlphaToInt(alpha));
-            return null;
-        }
+
+        final BackgroundAlphaColorDrawable bg = (BackgroundAlphaColorDrawable) v.getBackground();
+        ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), info.color, BackgroundAlphaColorDrawable.applyAlphaToColor(info.color, alpha));
+        anim.addUpdateListener(new AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                info.color = (Integer)animation.getAnimatedValue();
+                bg.setColor(info.color);
+            }
+        });
         anim.addListener(new AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -167,14 +159,18 @@ public class TransparencyManager {
         mIsKeyguardShowing = isKeyguardShowing();
         mIsHomeShowing = isLauncherShowing();
 
+        int anims = 0;
+
         ValueAnimator navAnim = null, sbAnim = null;
         if (mNavbar != null) {
             navAnim = createAnimation(mNavbarInfo, mNavbar);
+            anims++;
         }
         if (mStatusbar != null) {
             sbAnim = createAnimation(mStatusbarInfo, mStatusbar);
+            anims++;
         }
-        if (navAnim != null && sbAnim != null) {
+        if (anims > 1) {
             AnimatorSet set = new AnimatorSet();
             set.playTogether(navAnim, sbAnim);
             set.start();
@@ -251,7 +247,7 @@ public class TransparencyManager {
         ContentResolver resolver = mContext.getContentResolver();
 
         final float defaultAlpha = new Float(mContext.getResources().getInteger(
-                R.integer.navigation_bar_transparency) / 255f);
+                R.integer.navigation_bar_transparency) / 255);
         String alphas[];
         String settingValue = Settings.System.getString(resolver,
                 Settings.System.NAVIGATION_BAR_ALPHA_CONFIG);
